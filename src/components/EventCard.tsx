@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
 import { EventItem } from '../data/mock';
 import { Button } from './ui/Button';
+import { useLanguage } from '../context/LanguageContext';
 
 type Props = {
   event: EventItem;
@@ -11,37 +12,38 @@ type Props = {
 };
 
 export function EventCard({ event, onRsvp }: Props) {
+  const { t } = useLanguage();
   return (
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.datePill}>
-          <Text style={styles.dateText}>{event.date}</Text>
+          <Text style={styles.dateText}>{t(event.dateKey)}</Text>
         </View>
         {event.rsvp && (
           <View style={styles.goingPill}>
             <Ionicons name="checkmark" size={12} color={Colors.tag.share.text} />
-            <Text style={styles.goingText}>Going</Text>
+            <Text style={styles.goingText}>{t('events.going')}</Text>
           </View>
         )}
       </View>
       <View style={styles.body}>
-        <Text style={styles.title}>{event.title}</Text>
+        <Text style={styles.title}>{t(event.titleKey)}</Text>
         <View style={styles.metaRow}>
           <Ionicons name="person-outline" size={12} color={Colors.inkMuted} />
-          <Text style={styles.meta}>by {event.host}</Text>
+          <Text style={styles.meta}>{t('events.by', { host: event.host })}</Text>
         </View>
         <View style={styles.metaRow}>
           <Ionicons name="time-outline" size={12} color={Colors.inkMuted} />
-          <Text style={styles.meta}>{event.time}</Text>
+          <Text style={styles.meta}>{t(event.timeKey)}</Text>
         </View>
         <View style={styles.metaRow}>
           <Ionicons name="location-outline" size={12} color={Colors.inkMuted} />
-          <Text style={styles.meta}>{event.location}</Text>
+          <Text style={styles.meta}>{t(event.locationKey)}</Text>
         </View>
         <View style={styles.footer}>
-          <Text style={styles.attending}>{event.attending} going</Text>
+          <Text style={styles.attending}>{t('events.attendingCount', { count: event.attending })}</Text>
           <Button
-            label={event.rsvp ? 'Cancel RSVP' : 'RSVP'}
+            label={event.rsvp ? t('events.cancelRsvp') : t('events.rsvp')}
             variant={event.rsvp ? 'ghost' : 'primary'}
             onPress={() => onRsvp?.(event.id)}
             style={styles.rsvpBtn}

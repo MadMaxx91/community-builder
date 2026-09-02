@@ -4,8 +4,10 @@ import { Colors, Spacing, Typography, Radius } from '../constants/theme';
 import { events, EventItem } from '../data/mock';
 import { EventCard } from '../components/EventCard';
 import { Button } from '../components/ui/Button';
+import { useLanguage } from '../context/LanguageContext';
 
 export function EventsScreen() {
+  const { t } = useLanguage();
   const [items, setItems] = useState<EventItem[]>(events);
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
 
@@ -18,11 +20,10 @@ export function EventsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.topBar}>
-        <Text style={styles.title}>Events</Text>
-        <Button label="+ New" variant="primary" style={styles.newBtn} />
+        <Text style={styles.title}>{t('events.title')}</Text>
+        <Button label={t('events.new')} variant="primary" style={styles.newBtn} />
       </View>
 
-      {/* Filter pills */}
       <View style={styles.pills}>
         {(['all', 'mine'] as const).map(f => (
           <TouchableOpacity
@@ -32,7 +33,7 @@ export function EventsScreen() {
             activeOpacity={0.75}
           >
             <Text style={[styles.pillText, filter === f && styles.pillTextActive]}>
-              {f === 'all' ? 'All events' : 'My RSVPs'}
+              {f === 'all' ? t('events.allEvents') : t('events.myRsvps')}
             </Text>
           </TouchableOpacity>
         ))}
@@ -42,7 +43,7 @@ export function EventsScreen() {
         {displayed.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>📅</Text>
-            <Text style={styles.emptyText}>No RSVPs yet — browse all events to join one</Text>
+            <Text style={styles.emptyText}>{t('events.noRsvps')}</Text>
           </View>
         ) : (
           displayed.map(e => <EventCard key={e.id} event={e} onRsvp={toggleRsvp} />)

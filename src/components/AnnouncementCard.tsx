@@ -3,6 +3,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
 import { Announcement } from '../data/mock';
+import { useLanguage } from '../context/LanguageContext';
+import { ReactionBar } from './ReactionBar';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -15,6 +17,7 @@ const TYPE_CONFIG: Record<string, { icon: IconName; color: string; bg: string }>
 type Props = { item: Announcement };
 
 export function AnnouncementCard({ item }: Props) {
+  const { t } = useLanguage();
   const cfg = TYPE_CONFIG[item.type];
   return (
     <View style={[styles.card, { backgroundColor: cfg.bg }]}>
@@ -22,9 +25,10 @@ export function AnnouncementCard({ item }: Props) {
         <Ionicons name={cfg.icon} size={16} color={cfg.color} />
       </View>
       <View style={styles.content}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.body}>{item.body}</Text>
+        <Text style={styles.title}>{t(item.titleKey)}</Text>
+        <Text style={styles.body}>{t(item.bodyKey)}</Text>
         <Text style={styles.meta}>{item.author} · {item.time}</Text>
+        <ReactionBar itemId={item.id} />
       </View>
     </View>
   );

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
 import { ShareItem } from '../data/mock';
 import { Badge } from './ui/Badge';
+import { useLanguage } from '../context/LanguageContext';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function ShareItemCard({ item, onRequest }: Props) {
+  const { t } = useLanguage();
   const icon = CATEGORY_ICONS[item.category] ?? 'cube-outline';
   return (
     <View style={styles.card}>
@@ -28,18 +30,20 @@ export function ShareItemCard({ item, onRequest }: Props) {
       </View>
       <View style={styles.content}>
         <View style={styles.row}>
-          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.title}>{t(item.titleKey)}</Text>
           <Badge
-            label={item.available ? 'Available' : 'Borrowed'}
+            label={item.available ? t('share.availableBadge') : t('share.borrowedBadge')}
             bg={item.available ? Colors.tag.share.bg : Colors.tag.alert.bg}
             color={item.available ? Colors.tag.share.text : Colors.tag.alert.text}
           />
         </View>
-        <Text style={styles.meta}>{item.owner} · {item.floor} · expires {item.expiresIn}</Text>
+        <Text style={styles.meta}>
+          {t('share.expires', { owner: item.owner, floor: item.floor, expiresIn: t(item.expiresInKey) })}
+        </Text>
       </View>
       {item.available && (
         <TouchableOpacity style={styles.btn} onPress={() => onRequest?.(item.id)} activeOpacity={0.7}>
-          <Text style={styles.btnText}>Ask</Text>
+          <Text style={styles.btnText}>{t('share.ask')}</Text>
         </TouchableOpacity>
       )}
     </View>

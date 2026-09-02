@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -7,19 +7,25 @@ import { EventsScreen } from '../screens/EventsScreen';
 import { ShareScreen } from '../screens/ShareScreen';
 import { CommunityScreen } from '../screens/CommunityScreen';
 import { Colors } from '../constants/theme';
+import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 const Tab = createBottomTabNavigator();
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const TAB_ICONS: Record<string, { active: IconName; inactive: IconName }> = {
-  Home:      { active: 'home',           inactive: 'home-outline' },
-  Events:    { active: 'calendar',       inactive: 'calendar-outline' },
-  Share:     { active: 'swap-horizontal',inactive: 'swap-horizontal-outline' },
-  Community: { active: 'people',         inactive: 'people-outline' },
+  Home:      { active: 'home',            inactive: 'home-outline' },
+  Events:    { active: 'calendar',        inactive: 'calendar-outline' },
+  Share:     { active: 'swap-horizontal', inactive: 'swap-horizontal-outline' },
+  Community: { active: 'people',          inactive: 'people-outline' },
 };
 
 export function TabNavigator() {
+  const { t } = useLanguage();
+  const { activeCommunity } = useAuth();
+  const features = activeCommunity?.features;
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -34,14 +40,17 @@ export function TabNavigator() {
             />
           );
         },
-        tabBarLabel: ({ focused, children }) => (
+        tabBarLabel: ({ focused }) => (
           <Text style={{
             fontSize: 10,
             fontWeight: focused ? '600' : '400',
             color: focused ? Colors.ink : Colors.inkMuted,
             marginBottom: 4,
           }}>
-            {children}
+            {route.name === 'Home'      ? t('tabs.home')
+            : route.name === 'Events'  ? t('tabs.events')
+            : route.name === 'Share'   ? t('tabs.share')
+            : t('tabs.community')}
           </Text>
         ),
         tabBarStyle: {
@@ -56,8 +65,12 @@ export function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Events" component={EventsScreen} />
-      <Tab.Screen name="Share" component={ShareScreen} />
+      {(!features || features.events) && (
+        <Tab.Screen name="Events" component={EventsScreen} />
+      )}
+      {(!features || features.share) && (
+        <Tab.Screen name="Share" component={ShareScreen} />
+      )}
       <Tab.Screen name="Community" component={CommunityScreen} />
     </Tab.Navigator>
   );

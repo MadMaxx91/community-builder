@@ -1,3 +1,5 @@
+import { TranslationKey } from '../i18n/translations';
+
 export const currentUser = {
   id: 'u1',
   name: 'Alex Kim',
@@ -6,12 +8,78 @@ export const currentUser = {
   building: 'Maple House',
 };
 
+export type CommunityFeatures = {
+  polls: boolean;
+  events: boolean;
+  share: boolean;
+  market: boolean;
+  help: boolean;
+  wiki: boolean;
+  announcements: boolean;
+};
+
+export const DEFAULT_FEATURES: CommunityFeatures = {
+  polls: true, events: true, share: true, market: true, help: true, wiki: true, announcements: true,
+};
+
+export type CommunityMember = {
+  id: string;
+  name: string;
+  initials: string;
+  floor: string;
+  isAdmin: boolean;
+};
+
+export type CommunityType = 'building' | 'complex' | 'neighborhood' | 'street';
+
+export type Community = {
+  id: string;
+  name: string;
+  subtitle: string;
+  emoji: string;
+  memberCount: number;
+  type: CommunityType;
+  adminIds: string[];
+  features: CommunityFeatures;
+  members: CommunityMember[];
+  isPublic: boolean;
+  joinCode: string;
+  pendingRequestIds: string[];
+};
+
+const MAPLE_MEMBERS: CommunityMember[] = [
+  { id: 'u1',  name: 'Alex Kim',    initials: 'AK', floor: '6th Floor', isAdmin: true },
+  { id: 'u10', name: 'Sarah M.',    initials: 'SM', floor: '4th Floor', isAdmin: true },
+  { id: 'u11', name: 'Priya N.',    initials: 'PN', floor: '6th Floor', isAdmin: false },
+  { id: 'u12', name: 'Lars T.',     initials: 'LT', floor: '5th Floor', isAdmin: false },
+  { id: 'u13', name: 'Nina R.',     initials: 'NR', floor: '5th Floor', isAdmin: false },
+  { id: 'u14', name: 'Tom B.',      initials: 'TB', floor: '7th Floor', isAdmin: false },
+  { id: 'u15', name: 'Cara M.',     initials: 'CM', floor: '6th Floor', isAdmin: false },
+  { id: 'u16', name: 'Ji H.',       initials: 'JH', floor: '4th Floor', isAdmin: false },
+];
+
+const DEFAULT_MEMBERS: CommunityMember[] = [
+  { id: 'u20', name: 'Sam J.',  initials: 'SJ', floor: '2nd Floor', isAdmin: true },
+  { id: 'u21', name: 'Lee P.',  initials: 'LP', floor: '3rd Floor', isAdmin: false },
+];
+
+export const allCommunities: Community[] = [
+  { id: 'c1',  name: 'Maple House',      subtitle: 'All residents · 84 members',   emoji: '🍁', memberCount: 84,  type: 'building',      adminIds: ['u1', 'u10'], features: { ...DEFAULT_FEATURES }, members: MAPLE_MEMBERS,   isPublic: true,  joinCode: 'MH-4X7K', pendingRequestIds: [] },
+  { id: 'c4',  name: 'Oak Building',     subtitle: 'All residents · 60 members',   emoji: '🌳', memberCount: 60,  type: 'building',      adminIds: ['u20'],       features: { ...DEFAULT_FEATURES }, members: DEFAULT_MEMBERS, isPublic: true,  joinCode: 'OB-9R2P', pendingRequestIds: [] },
+  { id: 'c8',  name: 'Westside Lofts',   subtitle: 'All residents · 32 members',   emoji: '🏙', memberCount: 32,  type: 'building',      adminIds: ['u20'],       features: { ...DEFAULT_FEATURES }, members: DEFAULT_MEMBERS, isPublic: false, joinCode: 'WL-3T8N', pendingRequestIds: [] },
+  { id: 'c5',  name: 'Riverside Complex',subtitle: 'All residents · 120 members',  emoji: '🌊', memberCount: 120, type: 'complex',       adminIds: ['u20'],       features: { ...DEFAULT_FEATURES }, members: DEFAULT_MEMBERS, isPublic: true,  joinCode: 'RC-6F1D', pendingRequestIds: [] },
+  { id: 'c6',  name: 'The Pines',        subtitle: 'All residents · 45 members',   emoji: '🌲', memberCount: 45,  type: 'neighborhood',  adminIds: ['u20'],       features: { ...DEFAULT_FEATURES }, members: DEFAULT_MEMBERS, isPublic: true,  joinCode: 'TP-5M2W', pendingRequestIds: [] },
+  { id: 'c9',  name: 'Elm Street',       subtitle: 'Local street · 210 members',   emoji: '🛖', memberCount: 210, type: 'street',        adminIds: ['u20'],       features: { ...DEFAULT_FEATURES }, members: DEFAULT_MEMBERS, isPublic: true,  joinCode: 'ES-7Y4Q', pendingRequestIds: [] },
+  { id: 'c10', name: 'Riverside Drive',  subtitle: 'Local street · 165 members',   emoji: '🚶', memberCount: 165, type: 'street',        adminIds: ['u20'],       features: { ...DEFAULT_FEATURES }, members: DEFAULT_MEMBERS, isPublic: false, joinCode: 'RD-2K9A', pendingRequestIds: [] },
+  { id: 'c11', name: 'Maple Ave',        subtitle: 'Local street · 88 members',    emoji: '🍂', memberCount: 88,  type: 'street',        adminIds: ['u20'],       features: { ...DEFAULT_FEATURES }, members: DEFAULT_MEMBERS, isPublic: true,  joinCode: 'MA-8H6B', pendingRequestIds: [] },
+];
+
 export type EventItem = {
   id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
+  titleKey: TranslationKey;
+  dateKey: TranslationKey;
+  timeKey: TranslationKey;
+  locationKey: TranslationKey;
   host: string;
   attending: number;
   image: string;
@@ -19,91 +87,51 @@ export type EventItem = {
 };
 
 export const events: EventItem[] = [
-  {
-    id: 'e1',
-    title: 'Rooftop BBQ',
-    date: 'Sep 6',
-    time: '5:00 PM',
-    location: 'Rooftop, Maple House',
-    host: 'Sarah M.',
-    attending: 14,
-    image: 'bbq',
-    rsvp: true,
-  },
-  {
-    id: 'e2',
-    title: 'Board Game Night',
-    date: 'Sep 12',
-    time: '7:00 PM',
-    location: 'Common Room, 3F',
-    host: 'Tom & Jan',
-    attending: 6,
-    image: 'games',
-    rsvp: false,
-  },
-  {
-    id: 'e3',
-    title: 'Building Cleanup',
-    date: 'Sep 20',
-    time: '10:00 AM',
-    location: 'Main Entrance',
-    host: 'Building Mgmt',
-    attending: 22,
-    image: 'cleanup',
-    rsvp: false,
-  },
-  {
-    id: 'e4',
-    title: 'Yoga on the Lawn',
-    date: 'Sep 21',
-    time: '8:30 AM',
-    location: 'Garden',
-    host: 'Nina R.',
-    attending: 9,
-    image: 'yoga',
-    rsvp: false,
-  },
+  { id: 'e1', titleKey: 'event.e1.title', dateKey: 'event.e1.date', timeKey: 'event.e1.time', locationKey: 'event.e1.location', host: 'Sarah M.',      attending: 14, image: 'bbq',     rsvp: true },
+  { id: 'e2', titleKey: 'event.e2.title', dateKey: 'event.e2.date', timeKey: 'event.e2.time', locationKey: 'event.e2.location', host: 'Tom & Jan',     attending: 6,  image: 'games',   rsvp: false },
+  { id: 'e3', titleKey: 'event.e3.title', dateKey: 'event.e3.date', timeKey: 'event.e3.time', locationKey: 'event.e3.location', host: 'Building Mgmt', attending: 22, image: 'cleanup', rsvp: false },
+  { id: 'e4', titleKey: 'event.e4.title', dateKey: 'event.e4.date', timeKey: 'event.e4.time', locationKey: 'event.e4.location', host: 'Nina R.',       attending: 9,  image: 'yoga',    rsvp: false },
 ];
 
 export type ShareItem = {
   id: string;
-  title: string;
+  titleKey: TranslationKey;
   category: string;
   owner: string;
   floor: string;
   available: boolean;
-  expiresIn: string;
+  expiresInKey: TranslationKey;
   emoji: string;
 };
 
 export const shareItems: ShareItem[] = [
-  { id: 's1', title: 'Power Drill', category: 'Tools', owner: 'Mark D.', floor: '6F', available: true, expiresIn: '3 days', emoji: '🔧' },
-  { id: 's2', title: 'Eggs (6 free)', category: 'Food', owner: 'Lena S.', floor: '6F', available: true, expiresIn: '1 day', emoji: '🥚' },
-  { id: 's3', title: 'Yoga Mat', category: 'Sports', owner: 'Nina R.', floor: '5F', available: true, expiresIn: '5 days', emoji: '🧘' },
-  { id: 's4', title: 'Bread Loaf', category: 'Food', owner: 'Tom B.', floor: '7F', available: true, expiresIn: '12 hrs', emoji: '🍞' },
-  { id: 's5', title: 'Step Ladder', category: 'Tools', owner: 'Cara M.', floor: '6F', available: false, expiresIn: 'borrowed', emoji: '🪜' },
-  { id: 's6', title: 'Instant Pot', category: 'Kitchen', owner: 'Ji H.', floor: '4F', available: true, expiresIn: '7 days', emoji: '🍲' },
+  { id: 's1', titleKey: 'shareItem.s1.title', category: 'Tools',   owner: 'Mark D.', floor: '6F', available: true,  expiresInKey: 'shareItem.expires.3days',    emoji: '🔧' },
+  { id: 's2', titleKey: 'shareItem.s2.title', category: 'Food',    owner: 'Lena S.', floor: '6F', available: true,  expiresInKey: 'shareItem.expires.1day',     emoji: '🥚' },
+  { id: 's3', titleKey: 'shareItem.s3.title', category: 'Sports',  owner: 'Nina R.', floor: '5F', available: true,  expiresInKey: 'shareItem.expires.5days',    emoji: '🧘' },
+  { id: 's4', titleKey: 'shareItem.s4.title', category: 'Food',    owner: 'Tom B.',  floor: '7F', available: true,  expiresInKey: 'shareItem.expires.12hrs',    emoji: '🍞' },
+  { id: 's5', titleKey: 'shareItem.s5.title', category: 'Tools',   owner: 'Cara M.', floor: '6F', available: false, expiresInKey: 'shareItem.expires.borrowed', emoji: '🪜' },
+  { id: 's6', titleKey: 'shareItem.s6.title', category: 'Kitchen', owner: 'Ji H.',   floor: '4F', available: true,  expiresInKey: 'shareItem.expires.7days',    emoji: '🍲' },
 ];
 
 export type Announcement = {
   id: string;
   type: 'alert' | 'info' | 'noise';
-  title: string;
-  body: string;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
   author: string;
   time: string;
 };
 
 export const announcements: Announcement[] = [
-  { id: 'a1', type: 'noise', title: 'Party Saturday night 🎉', body: "We're hosting a birthday on 6F, expect some music until midnight. Apologies in advance!", author: 'Alex K.', time: '2h ago' },
-  { id: 'a2', type: 'alert', title: 'Elevator out of service', body: 'Elevator B is under maintenance. Expected back by Monday.', author: 'Building Mgmt', time: '5h ago' },
-  { id: 'a3', type: 'info', title: 'New neighbor on 6F!', body: 'Please welcome Jamie & Rina who just moved into 6C. Wave hello!', author: 'Sarah M.', time: '1d ago' },
+  { id: 'a1', type: 'noise', titleKey: 'ann.a1.title', bodyKey: 'ann.a1.body', author: 'Alex K.',       time: '2h ago' },
+  { id: 'a2', type: 'alert', titleKey: 'ann.a2.title', bodyKey: 'ann.a2.body', author: 'Building Mgmt', time: '5h ago' },
+  { id: 'a3', type: 'info',  titleKey: 'ann.a3.title', bodyKey: 'ann.a3.body', author: 'Sarah M.',      time: '1d ago' },
 ];
 
 export type HelpRequest = {
   id: string;
-  title: string;
-  body: string;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
   author: string;
   floor: string;
   time: string;
@@ -111,47 +139,57 @@ export type HelpRequest = {
 };
 
 export const helpRequests: HelpRequest[] = [
-  { id: 'h1', title: 'Can someone water my plants?', body: "Away Sep 8–14, 2 small succulents on windowsill. 5 mins tops.", author: 'Priya N.', floor: '6F', time: '3h ago', resolved: false },
-  { id: 'h2', title: 'Looking for a corkscrew', body: 'Need one tonight for a dinner party, can return tomorrow morning.', author: 'Lars T.', floor: '5F', time: '6h ago', resolved: true },
-  { id: 'h3', title: 'Dog walk this Thursday?', body: 'Need a 30-min walk for Biscuit around 2pm. Happy to pay!', author: 'Jess & Biscuit 🐶', floor: '7F', time: '1d ago', resolved: false },
+  { id: 'h1', titleKey: 'help.h1.title', bodyKey: 'help.h1.body', author: 'Priya N.',          floor: '6F', time: '3h ago', resolved: false },
+  { id: 'h2', titleKey: 'help.h2.title', bodyKey: 'help.h2.body', author: 'Lars T.',            floor: '5F', time: '6h ago', resolved: true },
+  { id: 'h3', titleKey: 'help.h3.title', bodyKey: 'help.h3.body', author: 'Jess & Biscuit 🐶', floor: '7F', time: '1d ago', resolved: false },
 ];
 
 export type Poll = {
   id: string;
-  question: string;
-  options: { label: string; votes: number }[];
+  questionKey: TranslationKey;
+  options: { labelKey: TranslationKey; votes: number }[];
   totalVotes: number;
-  endsIn: string;
+  endsInKey: TranslationKey;
 };
 
 export const polls: Poll[] = [
   {
     id: 'p1',
-    question: 'Best day for the community BBQ?',
+    questionKey: 'poll.p1.question',
     options: [
-      { label: 'Saturday Sep 6', votes: 12 },
-      { label: 'Sunday Sep 7', votes: 8 },
-      { label: 'Saturday Sep 13', votes: 5 },
+      { labelKey: 'poll.p1.opt1', votes: 12 },
+      { labelKey: 'poll.p1.opt2', votes: 8 },
+      { labelKey: 'poll.p1.opt3', votes: 5 },
     ],
     totalVotes: 25,
-    endsIn: '2 days',
+    endsInKey: 'poll.p1.endsIn',
   },
   {
     id: 'p2',
-    question: 'Should we add a bike storage room?',
+    questionKey: 'poll.p2.question',
     options: [
-      { label: 'Yes, great idea', votes: 18 },
-      { label: 'No', votes: 3 },
-      { label: 'Maybe, need more info', votes: 7 },
+      { labelKey: 'poll.p2.opt1', votes: 18 },
+      { labelKey: 'poll.p2.opt2', votes: 3 },
+      { labelKey: 'poll.p2.opt3', votes: 7 },
     ],
     totalVotes: 28,
-    endsIn: '5 days',
+    endsInKey: 'poll.p2.endsIn',
   },
 ];
 
+export type UserPoll = {
+  id: string;
+  question: string;
+  options: { label: string; votes: number }[];
+  totalVotes: number;
+  endsInLabel: string;
+  createdBy: string;
+  createdAt: number;
+};
+
 export type MarketItem = {
   id: string;
-  title: string;
+  titleKey: TranslationKey;
   price: string;
   seller: string;
   floor: string;
@@ -160,8 +198,8 @@ export type MarketItem = {
 };
 
 export const marketItems: MarketItem[] = [
-  { id: 'm1', title: 'IKEA bookshelf', price: '$40', seller: 'Dan W.', floor: '6F', emoji: '📚', free: false },
-  { id: 'm2', title: 'Coffee table', price: 'Free', seller: 'Soo K.', floor: '4F', emoji: '☕', free: true },
-  { id: 'm3', title: 'Winter jacket (M)', price: '$25', seller: 'Petra L.', floor: '5F', emoji: '🧥', free: false },
-  { id: 'm4', title: 'Bike (city)', price: '$120', seller: 'Omar A.', floor: '7F', emoji: '🚲', free: false },
+  { id: 'm1', titleKey: 'marketItem.m1.title', price: '$40',  seller: 'Dan W.',   floor: '6F', emoji: '📚', free: false },
+  { id: 'm2', titleKey: 'marketItem.m2.title', price: 'Free', seller: 'Soo K.',   floor: '4F', emoji: '☕', free: true },
+  { id: 'm3', titleKey: 'marketItem.m3.title', price: '$25',  seller: 'Petra L.', floor: '5F', emoji: '🧥', free: false },
+  { id: 'm4', titleKey: 'marketItem.m4.title', price: '$120', seller: 'Omar A.',  floor: '7F', emoji: '🚲', free: false },
 ];

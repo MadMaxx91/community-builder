@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Torbu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --bg:           #F2EDE5;
+      --fg:           #1C1813;
+      --surface:      #FDFAF6;
+      --surface-2:    #EDE7DC;
+      --accent:       #2E5E3A;
+      --accent-pale:  #E3EEE6;
+      --muted:        #7A7165;
+      --border:       #D6CFBF;
+      --dark-bg:      #141210;
+      --dark-fg:      #EDE8DF;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg:          #111009;
+        --fg:          #EDE8DF;
+        --surface:     #1A1815;
+        --surface-2:   #222018;
+        --accent:      #4DAB65;
+        --accent-pale: #162219;
+        --muted:       #8A8377;
+        --border:      #2C2820;
+        --dark-bg:     #0A0907;
+        --dark-fg:     #EDE8DF;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg:          #111009;
+      --fg:          #EDE8DF;
+      --surface:     #1A1815;
+      --surface-2:   #222018;
+      --accent:      #4DAB65;
+      --accent-pale: #162219;
+      --muted:       #8A8377;
+      --border:      #2C2820;
+      --dark-bg:     #0A0907;
+      --dark-fg:     #EDE8DF;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Layout ── */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+    .nav-cta {
+      background: var(--fg);
+      color: var(--bg);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 9px 20px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .nav-cta:hover { opacity: 0.8; }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 80px 0 100px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (max-width: 720px) {
+      .hero { grid-template-columns: 1fr; padding: 48px 0 64px; gap: 48px; }
+      .hero-visual { order: -1; }
+    }
+
+    .hero-text {}
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+    .hero-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .acronym {
+      margin-bottom: 36px;
+    }
+    .acronym-row {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      line-height: 1.15;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .acronym-row:first-child { border-top: 1px solid var(--border); }
+    .acronym-letter {
+      font-family: var(--font-display);
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 800;
+      font-style: italic;
+      color: var(--accent);
+      width: 52px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .acronym-word {
+      font-family: var(--font-display);
+      font-size: clamp(18px, 2.8vw, 28px);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--fg);
+      text-wrap: balance;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 400px;
+    }
+
+    /* ── Phone mockup ── */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+    }
+    .phone-wrap {
+      position: relative;
+    }
+    .phone-frame {
+      width: 280px;
+      height: 560px;
+      background: var(--surface);
+      border-radius: 36px;
+      border: 2px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06);
+      position: relative;
+    }
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 22px;
+      background: var(--fg);
+      border-radius: 0 0 14px 14px;
+      z-index: 10;
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    /* ── App UI Mockup ── */
+    .mock-status {
+      height: 28px;
+      padding: 8px 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .mock-status-time { font-variant-numeric: tabular-nums; }
+    .mock-body { padding: 8px 14px 0; }
+    .mock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .mock-greeting {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      font-style: italic;
+    }
+    .mock-avatar {
+      width: 30px;
+      height: 30px;
+      background: var(--fg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg);
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .mock-pill {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .mock-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+    .mock-shortcuts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .mock-shortcut {
+      background: var(--accent-pale);
+      border-radius: 10px;
+      padding: 8px 9px;
+      font-size: 10px;
+    }
+    .mock-shortcut-icon { font-size: 14px; margin-bottom: 3px; }
+    .mock-shortcut-label { font-weight: 500; color: var(--fg); font-size: 9px; }
+    .mock-shortcut-alt { background: #EEF2FF; }
+    .mock-shortcut-alt3 { background: #F5F0E8; }
+    .mock-shortcut-alt4 { background: #E8F4EC; }
+
+    .mock-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+      margin-bottom: 7px;
+    }
+    .mock-card-type {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 3px;
+    }
+    .mock-card-title { font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+    .mock-card-body { font-size: 9px; color: var(--muted); line-height: 1.4; }
+    .mock-reactions { display: flex; gap: 4px; margin-top: 6px; }
+    .mock-reaction {
+      background: var(--surface-2);
+      border-radius: 100px;
+      padding: 2px 7px;
+      font-size: 9px;
+    }
+
+    /* shadow phone for depth */
+    .phone-shadow {
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 30px;
+      background: rgba(0,0,0,0.12);
+      filter: blur(20px);
+      border-radius: 50%;
+    }
+
+    /* ── Manifesto strip ── */
+    .manifesto {
+      background: var(--dark-bg);
+      color: var(--dark-fg);
+      padding: 72px 0;
+    }
+    .manifesto-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    @media (max-width: 640px) {
+      .manifesto-grid { grid-template-columns: 1fr; }
+    }
+    .manifesto-cell {
+      background: var(--dark-bg);
+      padding: 40px 36px;
+    }
+    .manifesto-no {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      font-style: italic;
+      line-height: 1.1;
+      text-wrap: balance;
+      margin-bottom: 12px;
+    }
+    .manifesto-no span { color: rgba(255,255,255,0.25); }
+    .manifesto-explain {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.6;
+    }
+
+    /* ── Screenshots section ── */
+    .screens-section {
+      padding: 96px 0;
+    }
+    .section-heading {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .section-eyebrow {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+      font-style: italic;
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+    .section-sub {
+      margin-top: 16px;
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Three phone screenshots side by side */
+    .phones-row {
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    @media (max-width: 720px) {
+      .phones-row { gap: 14px; }
+      .phones-row .phone-frame { width: 200px; height: 400px; }
+      .phone-label { font-size: 11px !important; }
+    }
+    @media (max-width: 500px) {
+      .phones-row { overflow-x: auto; justify-content: flex-start; padding-bottom: 8px; }
+    }
+    .phone-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .phone-col.center-phone .phone-frame {
+      width: 270px;
+      height: 540px;
+    }
+    .phone-col.side-phone .phone-frame {
+      width: 230px;
+      height: 460px;
+      opacity: 0.85;
+    }
+    .phone-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Screen 2: Community People */
+    .mock-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .mock-tab {
+      font-size: 9px;
+      font-weight: 500;
+      padding: 6px 8px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .mock-tab.active {
+      color: var(--fg);
+      border-bottom: 2px solid var(--fg);
+      font-weight: 600;
+    }
+    .mock-search {
+      background: var(--surface-2);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 9px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .mock-member {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .mock-member-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent-pale);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .mock-member-name { font-size: 10px; font-weight: 500; }
+    .mock-member-floor { font-size: 9px; color: var(--muted); }
+    .mock-badge {
+      margin-left: auto;
+      font-size: 8px;
+      background: var(--fg);
+      color: var(--bg);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    /* Screen 3: Events */
+    .mock-event-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+      margin-bottom: 7px;
+    }
+    .mock-event-date {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2px;
+    }
+    .mock-event-title { font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+    .mock-event-meta { font-size: 9px; color: var(--muted); }
+    .mock-rsvp {
+      display: inline-block;
+      margin-top: 6px;
+      background: var(--fg);
+      color: var(--bg);
+      font-size: 8px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+
+    /* ── Features ── */
+    .features-section {
+      padding: 0 0 96px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    @media (max-width: 720px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 440px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+    .feature-cell {
+      background: var(--surface);
+      padding: 28px 24px;
+    }
+    .feature-icon { font-size: 24px; margin-bottom: 12px; }
+    .feature-name {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+    /* ── Community types ── */
+    .types-section {
+      background: var(--accent-pale);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 0;
+    }
+    .types-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 36px;
+    }
+    .type-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 96px 0 80px;
+      text-align: center;
+    }
+    .cta-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800;
+      font-style: italic;
+      line-height: 1.1;
+      text-wrap: balance;
+      margin-bottom: 20px;
+    }
+    .cta-sub {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 440px;
+      margin: 0 auto 36px;
+    }
+    .cta-form {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 14px 22px;
+      font-size: 15px;
+      font-family: var(--font-body);
+      color: var(--fg);
+      width: 280px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .cta-input::placeholder { color: var(--muted); }
+    .cta-input:focus { border-color: var(--accent); }
+    .cta-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 100px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .cta-btn:hover { opacity: 0.85; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      font-style: italic;
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <span class="nav-logo">Torbu</span>
+      <a href="#early-access" class="nav-cta">Get early access</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section>
+  <div class="container">
+    <div class="hero">
+      <div class="hero-text">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot"></span>
+          Community software
+        </div>
+        <div class="acronym">
+          <div class="acronym-row">
+            <span class="acronym-letter">T</span>
+            <span class="acronym-word">Together</span>
+          </div>
+          <div class="acronym-row">
+            <span class="acronym-letter">O</span>
+            <span class="acronym-word">Our</span>
+          </div>
+          <div class="acronym-row">
+            <span class="acronym-letter">R</span>
+            <span class="acronym-word">Resources</span>
+          </div>
+          <div class="acronym-row">
+            <span class="acronym-letter">B</span>
+            <span class="acronym-word">Build</span>
+          </div>
+          <div class="acronym-row">
+            <span class="acronym-letter">U</span>
+            <span class="acronym-word">Unity</span>
+          </div>
+        </div>
+        <p class="hero-sub">A private space for the people you actually live and work alongside — your building, neighborhood, or group of friends.</p>
+      </div>
+      <div class="hero-visual">
+        <div class="phone-wrap">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <!-- Mock Home Screen -->
+              <div class="mock-status">
+                <span class="mock-status-time">9:41</span>
+                <span>● ● ●</span>
+              </div>
+              <div class="mock-body">
+                <div class="mock-header">
+                  <div class="mock-greeting">Hello, Alex!</div>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;">🔔</div>
+                    <div class="mock-avatar">AK</div>
+                  </div>
+                </div>
+                <div class="mock-pill">
+                  <span>🍁</span>
+                  <span>Maple House</span>
+                  <span style="margin-left:auto;color:var(--muted)">▾</span>
+                </div>
+                <div class="mock-section-label">SHORTCUTS</div>
+                <div class="mock-shortcuts">
+                  <div class="mock-shortcut">
+                    <div class="mock-shortcut-icon">✋</div>
+                    <div class="mock-shortcut-label">Help requests</div>
+                  </div>
+                  <div class="mock-shortcut mock-shortcut-alt">
+                    <div class="mock-shortcut-icon">📊</div>
+                    <div class="mock-shortcut-label">Active polls</div>
+                  </div>
+                  <div class="mock-shortcut mock-shortcut-alt3">
+                    <div class="mock-shortcut-icon">🛍</div>
+                    <div class="mock-shortcut-label">Marketplace</div>
+                  </div>
+                  <div class="mock-shortcut mock-shortcut-alt4">
+                    <div class="mock-shortcut-icon">📄</div>
+                    <div class="mock-shortcut-label">Building wiki</div>
+                  </div>
+                </div>
+                <div class="mock-section-label">COMMUNITY FEED</div>
+                <div class="mock-card">
+                  <div class="mock-card-type">📢 Announcement</div>
+                  <div class="mock-card-title">Party Saturday night 🎉</div>
+                  <div class="mock-card-body">Hosting a birthday on 6F, expect music until midnight.</div>
+                  <div class="mock-reactions">
+                    <span class="mock-reaction">👍 5</span>
+                    <span class="mock-reaction">❤️ 2</span>
+                  </div>
+                </div>
+                <div class="mock-card">
+                  <div class="mock-card-type">📅 New event</div>
+                  <div class="mock-card-title">Rooftop BBQ</div>
+                  <div class="mock-card-body">Sep 6 · 5:00 PM · Rooftop · 14 going</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-shadow"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Manifesto strip -->
+<section class="manifesto">
+  <div class="container">
+    <div class="manifesto-grid">
+      <div class="manifesto-cell">
+        <div class="manifesto-no"><span>No</span> endless<br>scrolling.</div>
+        <p class="manifesto-explain">Your feed is your community. No algorithm, no sponsored posts, no strangers.</p>
+      </div>
+      <div class="manifesto-cell">
+        <div class="manifesto-no"><span>No</span> AI.</div>
+        <p class="manifesto-explain">Real conversations with real neighbors. No chatbots drafting your announcements.</p>
+      </div>
+      <div class="manifesto-cell">
+        <div class="manifesto-no">Just<br>communities.</div>
+        <p class="manifesto-explain">A place for your building, your street, your friend group — nothing more, nothing less.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screenshots -->
+<section class="screens-section">
+  <div class="container">
+    <div class="section-heading">
+      <div class="section-eyebrow">Built for real life</div>
+      <h2 class="section-title">Everything your community needs.<br>Nothing it doesn't.</h2>
+      <p class="section-sub">From shared announcements to help requests, events, and a community marketplace — all in one quiet place.</p>
+    </div>
+    <div class="phones-row">
+
+      <!-- Left: Community People tab -->
+      <div class="phone-col side-phone">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="mock-status" style="font-size:9px;">
+              <span class="mock-status-time">9:41</span><span>●●●</span>
+            </div>
+            <div class="mock-body">
+              <div class="mock-section-label" style="margin-bottom:8px;">MAPLE HOUSE</div>
+              <div class="mock-tabs">
+                <div class="mock-tab active">People</div>
+                <div class="mock-tab">Help</div>
+                <div class="mock-tab">Polls</div>
+                <div class="mock-tab">Market</div>
+                <div class="mock-tab">Wiki</div>
+              </div>
+              <div class="mock-search">🔍 Search members…</div>
+              <div class="mock-member">
+                <div class="mock-member-avatar">AK</div>
+                <div><div class="mock-member-name">Alex Kim</div><div class="mock-member-floor">Floor 6</div></div>
+                <div class="mock-badge">Admin</div>
+              </div>
+              <div class="mock-member">
+                <div class="mock-member-avatar">SM</div>
+                <div><div class="mock-member-name">Sarah M.</div><div class="mock-member-floor">Floor 4</div></div>
+              </div>
+              <div class="mock-member">
+                <div class="mock-member-avatar">JB</div>
+                <div><div class="mock-member-name">James B.</div><div class="mock-member-floor">Floor 2</div></div>
+              </div>
+              <div class="mock-member">
+                <div class="mock-member-avatar">LT</div>
+                <div><div class="mock-member-name">Lin T.</div><div class="mock-member-floor">Floor 7</div></div>
+              </div>
+              <div class="mock-member">
+                <div class="mock-member-avatar">RO</div>
+                <div><div class="mock-member-name">Rosa O.</div><div class="mock-member-floor">Floor 3</div></div>
+              </div>
+              <div class="mock-member">
+                <div class="mock-member-avatar">PD</div>
+                <div><div class="mock-member-name">Pete D.</div><div class="mock-member-floor">Floor 5</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="phone-label">Community directory</span>
+      </div>
+
+      <!-- Center: Home feed -->
+      <div class="phone-col center-phone">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="mock-status">
+              <span class="mock-status-time">9:41</span>
+              <span>● ● ●</span>
+            </div>
+            <div class="mock-body">
+              <div class="mock-header">
+                <div class="mock-greeting">Hello, Alex!</div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;">
+                    🔔
+                    <span style="position:absolute;top:0;right:0;width:8px;height:8px;background:#E53E3E;border-radius:50%;"></span>
+                  </div>
+                  <div class="mock-avatar">AK</div>
+                </div>
+              </div>
+              <div class="mock-pill">
+                <span>🍁</span><span>Maple House</span>
+                <span style="margin-left:auto;color:var(--muted)">▾</span>
+              </div>
+              <div class="mock-shortcuts" style="margin-bottom:14px;">
+                <div class="mock-shortcut"><div class="mock-shortcut-icon">✋</div><div class="mock-shortcut-label">Help requests</div></div>
+                <div class="mock-shortcut mock-shortcut-alt"><div class="mock-shortcut-icon">📊</div><div class="mock-shortcut-label">Active polls</div></div>
+                <div class="mock-shortcut mock-shortcut-alt3"><div class="mock-shortcut-icon">🛍</div><div class="mock-shortcut-label">Marketplace</div></div>
+                <div class="mock-shortcut mock-shortcut-alt4"><div class="mock-shortcut-icon">📄</div><div class="mock-shortcut-label">Building wiki</div></div>
+              </div>
+              <div class="mock-section-label">COMMUNITY FEED</div>
+              <div class="mock-card">
+                <div class="mock-card-type">📢 Announcement · 2h ago</div>
+                <div class="mock-card-title">Party Saturday night 🎉</div>
+                <div class="mock-card-body">Hosting a birthday on 6F, expect some music until midnight. Apologies in advance!</div>
+                <div class="mock-reactions">
+                  <span class="mock-reaction">👍 5</span>
+                  <span class="mock-reaction">❤️ 2</span>
+                  <span class="mock-reaction" style="margin-left:auto;">＋</span>
+                </div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-type">📅 New event · 3h ago</div>
+                <div class="mock-card-title">Rooftop BBQ</div>
+                <div class="mock-card-body">Sep 6 · 5:00 PM · Rooftop, Maple House · 14 going · by Sarah M.</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-type">✋ Help request · 4h ago</div>
+                <div class="mock-card-title">Anyone have a drill?</div>
+                <div class="mock-card-body">Need to hang some shelves — would borrow for an hour. Floor 6.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="phone-label">Community feed</span>
+      </div>
+
+      <!-- Right: Events -->
+      <div class="phone-col side-phone">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="mock-status" style="font-size:9px;">
+              <span class="mock-status-time">9:41</span><span>●●●</span>
+            </div>
+            <div class="mock-body">
+              <div style="font-family:var(--font-display);font-size:16px;font-weight:700;font-style:italic;margin-bottom:10px;">Events</div>
+              <div style="display:flex;gap:6px;margin-bottom:12px;">
+                <div style="background:var(--fg);color:var(--bg);border-radius:100px;padding:4px 10px;font-size:9px;font-weight:600;">All events</div>
+                <div style="background:var(--surface-2);border-radius:100px;padding:4px 10px;font-size:9px;color:var(--muted);">My RSVPs</div>
+              </div>
+              <div class="mock-event-card">
+                <div class="mock-event-date">Sep 6 · 5:00 PM</div>
+                <div class="mock-event-title">Rooftop BBQ 🍖</div>
+                <div class="mock-event-meta">Rooftop · by Sarah M. · 14 going</div>
+                <div class="mock-rsvp">RSVP</div>
+              </div>
+              <div class="mock-event-card">
+                <div class="mock-event-date">Sep 10 · 7:00 PM</div>
+                <div class="mock-event-title">Book club: Sept pick</div>
+                <div class="mock-event-meta">Common room · 8 going</div>
+                <div class="mock-rsvp">RSVP</div>
+              </div>
+              <div class="mock-event-card">
+                <div class="mock-event-date">Sep 14 · 10:00 AM</div>
+                <div class="mock-event-title">Building cleanup day</div>
+                <div class="mock-event-meta">Lobby · 5 going</div>
+              </div>
+              <div class="mock-event-card">
+                <div class="mock-event-date">Sep 20 · 6:30 PM</div>
+                <div class="mock-event-title">Monthly residents meeting</div>
+                <div class="mock-event-meta">Rooftop · by Admin</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="phone-label">Events &amp; RSVPs</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-section">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feature-cell">
+        <div class="feature-icon">📢</div>
+        <div class="feature-name">Announcements</div>
+        <p class="feature-desc">Post updates that actually reach your neighbors, not an algorithm.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">📅</div>
+        <div class="feature-name">Events</div>
+        <p class="feature-desc">RSVP, plan, and keep track of what's happening in your community.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">✋</div>
+        <div class="feature-name">Help requests</div>
+        <p class="feature-desc">Need a hand? Ask your community instead of a stranger.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">📊</div>
+        <div class="feature-name">Polls</div>
+        <p class="feature-desc">Make decisions together — from paint colors to parking rules.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">🛍</div>
+        <div class="feature-name">Marketplace</div>
+        <p class="feature-desc">Buy, sell, and share with people right down the hall.</p>
+      </div>
+      <div class="feature-cell">
+        <div class="feature-icon">📄</div>
+        <div class="feature-name">Community wiki</div>
+        <p class="feature-desc">Trash schedules, emergency contacts, how to use the boiler room.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Community types -->
+<section class="types-section">
+  <div class="container">
+    <div class="section-heading">
+      <div class="section-eyebrow">For any community</div>
+      <h2 class="section-title">Works wherever people share a space or a bond.</h2>
+    </div>
+    <div class="types-row">
+      <div class="type-chip">🏢 Apartment buildings</div>
+      <div class="type-chip">🏘 Neighborhoods</div>
+      <div class="type-chip">🧑‍🤝‍🧑 Friend groups</div>
+      <div class="type-chip">🏠 Streets &amp; blocks</div>
+      <div class="type-chip">🏙 Residential complexes</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="early-access">
+  <div class="container">
+    <h2 class="cta-title">Your community<br>is already here.</h2>
+    <p class="cta-sub">Join the early access list. We'll let you know when Torbu opens to new communities.</p>
+    <div class="cta-form">
+      <input class="cta-input" type="email" placeholder="your@email.com" />
+      <button class="cta-btn">Join the waitlist</button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <span class="footer-logo">Torbu</span>
+      <span class="footer-copy">Together Our Resources Build Unity</span>
+      <span class="footer-copy">© 2026 Torbu</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
