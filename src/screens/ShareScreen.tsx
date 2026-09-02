@@ -4,10 +4,20 @@ import { Colors, Spacing, Typography, Radius } from '../constants/theme';
 import { shareItems, ShareItem } from '../data/mock';
 import { ShareItemCard } from '../components/ShareItemCard';
 import { Button } from '../components/ui/Button';
+import { useLanguage } from '../context/LanguageContext';
 
-const CATEGORIES = ['All', 'Tools', 'Food', 'Sports', 'Kitchen'];
+type Category = { key: string; labelKey: 'share.catAll' | 'share.catTools' | 'share.catFood' | 'share.catSports' | 'share.catKitchen' };
+
+const CATEGORIES: Category[] = [
+  { key: 'All',     labelKey: 'share.catAll' },
+  { key: 'Tools',   labelKey: 'share.catTools' },
+  { key: 'Food',    labelKey: 'share.catFood' },
+  { key: 'Sports',  labelKey: 'share.catSports' },
+  { key: 'Kitchen', labelKey: 'share.catKitchen' },
+];
 
 export function ShareScreen() {
+  const { t } = useLanguage();
   const [items] = useState<ShareItem[]>(shareItems);
   const [cat, setCat] = useState('All');
 
@@ -16,39 +26,37 @@ export function ShareScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.topBar}>
-        <Text style={styles.title}>Share & Borrow</Text>
-        <Button label="+ Share" variant="primary" style={styles.newBtn} />
+        <Text style={styles.title}>{t('share.title')}</Text>
+        <Button label={t('share.new')} variant="primary" style={styles.newBtn} />
       </View>
 
-      {/* Category filter */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll} contentContainerStyle={styles.catContent}>
         {CATEGORIES.map(c => (
           <TouchableOpacity
-            key={c}
-            style={[styles.pill, cat === c && styles.pillActive]}
-            onPress={() => setCat(c)}
+            key={c.key}
+            style={[styles.pill, cat === c.key && styles.pillActive]}
+            onPress={() => setCat(c.key)}
             activeOpacity={0.75}
           >
-            <Text style={[styles.pillText, cat === c && styles.pillTextActive]}>{c}</Text>
+            <Text style={[styles.pillText, cat === c.key && styles.pillTextActive]}>{t(c.labelKey)}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Stats row */}
       <View style={styles.statsRow}>
         <View style={styles.stat}>
           <Text style={styles.statNum}>{items.filter(i => i.available).length}</Text>
-          <Text style={styles.statLabel}>available now</Text>
+          <Text style={styles.statLabel}>{t('share.availableNow')}</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.stat}>
           <Text style={styles.statNum}>{items.filter(i => !i.available).length}</Text>
-          <Text style={styles.statLabel}>borrowed</Text>
+          <Text style={styles.statLabel}>{t('share.borrowed')}</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.stat}>
           <Text style={styles.statNum}>{items.length}</Text>
-          <Text style={styles.statLabel}>total items</Text>
+          <Text style={styles.statLabel}>{t('share.totalItems')}</Text>
         </View>
       </View>
 
