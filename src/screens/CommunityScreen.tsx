@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, Radius } from '../constants/theme';
 import { helpRequests, polls, marketItems, HelpRequest } from '../data/mock';
+import { QuickActionCard } from '../components/QuickActionCard';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
 import { useLanguage } from '../context/LanguageContext';
@@ -36,7 +38,7 @@ const WIKI_ENTRIES: WikiEntry[] = [
   { icon: 'cube-outline',         titleKey: 'wiki.mailroom',  bodyKey: 'wiki.mailroomBody' },
 ];
 
-export function CommunityScreen({ route }: { route?: any }) {
+export function CommunityScreen({ route, navigation }: { route?: any; navigation?: any }) {
   const { t } = useLanguage();
   const { isAdmin, setAdminVisible, activeCommunity } = useAuth();
   const { userPolls } = useContent();
@@ -63,18 +65,35 @@ export function CommunityScreen({ route }: { route?: any }) {
     : members;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.screenBg}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>{activeCommunity?.name ?? t('community.title')}</Text>
-        {isAdmin && (
-          <TouchableOpacity onPress={() => setAdminVisible(true)} style={styles.adminBtn} activeOpacity={0.7}>
-            <Ionicons name="settings-outline" size={20} color={Colors.inkSoft} />
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={() => navigation?.navigate('ShareModal')} style={styles.iconBtn} activeOpacity={0.7}>
+            <Ionicons name="add-circle-outline" size={24} color={Colors.ink} />
           </TouchableOpacity>
-        )}
+          {isAdmin && (
+            <TouchableOpacity onPress={() => setAdminVisible(true)} style={styles.iconBtn} activeOpacity={0.7}>
+              <Ionicons name="settings-outline" size={20} color={Colors.inkSoft} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <CommunityAdminScreen />
       <CreatePollModal visible={createPollOpen} onClose={() => setCreatePollOpen(false)} />
+
+      {/* Shortcuts row */}
+      <View style={styles.shortcutsSection}>
+        <Text style={styles.shortcutsTitle}>{t('home.shortcuts')}</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
+          <QuickActionCard icon="hand-left-outline" label={t('home.helpRequests')} count={helpRequests.filter(r => !r.resolved).length} bg={Colors.tag.help.bg} onPress={() => setTab('help')} />
+          <QuickActionCard icon="bar-chart-outline" label={t('home.activePolls')} count={allPolls.length} bg={Colors.tag.poll.bg} onPress={() => setTab('polls')} />
+          <QuickActionCard icon="storefront-outline" label={t('home.marketplace')} count={marketItems.length} bg={Colors.tag.market.bg} onPress={() => setTab('market')} />
+          <QuickActionCard icon="document-text-outline" label={t('home.buildingWiki')} bg={Colors.surfaceAlt} onPress={() => setTab('wiki')} />
+        </ScrollView>
+      </View>
 
       {visibleTabs.length > 0 ? (
         <>
@@ -267,11 +286,13 @@ export function CommunityScreen({ route }: { route?: any }) {
         </View>
       )}
     </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  screenBg: { flex: 1, backgroundColor: Colors.background },
+  safe: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -281,7 +302,12 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
   },
   title: { ...Typography.h1, flex: 1 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   adminBtn: { padding: 4 },
+  shortcutsSection: { paddingHorizontal: Spacing.md, marginBottom: Spacing.sm },
+  shortcutsTitle: { ...Typography.h3, marginBottom: Spacing.sm },
+  catRow: { flexDirection: 'row', gap: Spacing.lg, paddingBottom: Spacing.sm },
   tabRowWrapper: { flexShrink: 0 },
   tabRow: { flexDirection: 'row', paddingHorizontal: Spacing.md, gap: Spacing.sm, marginBottom: Spacing.sm, paddingRight: Spacing.md, alignItems: 'center' },
   tab: {
@@ -299,7 +325,7 @@ const styles = StyleSheet.create({
   tabLabel: { fontSize: 12, fontWeight: '500', color: Colors.inkSoft },
   tabLabelActive: { color: Colors.accentFg },
   scroll: { flex: 1 },
-  content: { padding: Spacing.md, paddingBottom: 40 },
+  content: { padding: Spacing.md, paddingBottom: 120 },
   // Directory
   directoryHeader: { marginBottom: Spacing.sm },
   directoryCount: { ...Typography.label, color: Colors.inkSoft },

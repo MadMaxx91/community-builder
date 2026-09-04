@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography, Radius } from '../constants/theme';
-import { marketItems, helpRequests, polls } from '../data/mock';
+import { Colors, Spacing, Typography } from '../constants/theme';
 import { Avatar } from '../components/ui/Avatar';
-import { QuickActionCard } from '../components/QuickActionCard';
 import { CommunitySwitcher } from '../components/CommunitySwitcher';
 import { FeedCard } from '../components/FeedCard';
 import { NotificationCenter } from '../components/NotificationCenter';
@@ -20,11 +19,11 @@ export function HomeScreen({ navigation }: Props) {
   const { feedItems, unreadCount } = useContent();
   const [notifVisible, setNotifVisible] = useState(false);
 
-  const openRequests = helpRequests.filter(r => !r.resolved).length;
   const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.screenBg}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         <View style={styles.header}>
@@ -32,6 +31,9 @@ export function HomeScreen({ navigation }: Props) {
             <Text style={styles.greeting}>{t('home.greeting', { name: firstName })}</Text>
           </View>
           <View style={styles.headerActions}>
+            <TouchableOpacity onPress={() => navigation.navigate('ShareModal')} activeOpacity={0.7} style={styles.iconBtn}>
+              <Ionicons name="add-circle-outline" size={24} color={Colors.ink} />
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => setNotifVisible(true)} activeOpacity={0.7} style={styles.bellBtn}>
               <Ionicons name="notifications-outline" size={22} color={Colors.ink} />
               {unreadCount > 0 && (
@@ -48,16 +50,6 @@ export function HomeScreen({ navigation }: Props) {
 
         <CommunitySwitcher />
 
-        <Text style={styles.sectionTitle}>{t('home.shortcuts')}</Text>
-        <View style={styles.gridRow}>
-          <QuickActionCard icon="hand-left-outline" label={t('home.helpRequests')} count={openRequests} bg="#FFF0E6" onPress={() => navigation.navigate('Community', { tab: 'help' })} />
-          <QuickActionCard icon="bar-chart-outline" label={t('home.activePolls')} count={polls.length} bg="#EEF2FF" onPress={() => navigation.navigate('Community', { tab: 'polls' })} />
-        </View>
-        <View style={[styles.gridRow, { marginTop: Spacing.sm }]}>
-          <QuickActionCard icon="storefront-outline" label={t('home.marketplace')} count={marketItems.length} bg="#F5F0E8" onPress={() => navigation.navigate('Community', { tab: 'market' })} />
-          <QuickActionCard icon="document-text-outline" label={t('home.buildingWiki')} bg="#E8F4EC" onPress={() => navigation.navigate('Community', { tab: 'wiki' })} />
-        </View>
-
         <Text style={styles.sectionTitle}>{t('feed.title')}</Text>
         {feedItems.map(item => <FeedCard key={item.id} item={item} />)}
 
@@ -65,17 +57,20 @@ export function HomeScreen({ navigation }: Props) {
 
       <NotificationCenter visible={notifVisible} onClose={() => setNotifVisible(false)} />
     </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  screenBg: { flex: 1, backgroundColor: Colors.background },
+  safe: { flex: 1 },
   scroll: { flex: 1 },
-  content: { padding: Spacing.md, paddingBottom: 40 },
+  content: { padding: Spacing.md, paddingBottom: 120 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   greeting: { ...Typography.h1 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  bellBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  bellBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   badge: {
     position: 'absolute',
     top: 4,
@@ -90,5 +85,4 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: '#fff', fontSize: 9, fontWeight: '700' },
   sectionTitle: { ...Typography.h3, marginBottom: Spacing.sm, marginTop: Spacing.sm },
-  gridRow: { flexDirection: 'row', gap: Spacing.sm },
 });

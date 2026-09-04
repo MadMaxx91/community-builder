@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, StyleSheet, SafeAreaView,
+  View, Text, TextInput, StyleSheet, SafeAreaView, Image,
   TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
 } from 'react-native';
-import { Colors, Spacing, Radius, Typography } from '../../constants/theme';
+import { Colors, Spacing, Radius, Font } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -35,12 +35,15 @@ export function LoginScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+
           <View style={styles.logoArea}>
-            <View style={styles.logoMark}>
-              <Text style={styles.logoIcon}>🏘</Text>
-            </View>
-            <Text style={styles.appName}>Community</Text>
-            <Text style={styles.tagline}>Communities, connected.</Text>
+            <Image
+              source={require('../../../assets/torbu-mark.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.appName}>Torbu</Text>
+            <Text style={styles.tagline}>Share nearby. Belong locally.</Text>
           </View>
 
           <View style={styles.card}>
@@ -107,6 +110,7 @@ export function LoginScreen({ navigation }: Props) {
             <Text style={styles.switchText}>{t('auth.noAccount')} </Text>
             <Text style={styles.switchLink}>{t('auth.signUp')}</Text>
           </TouchableOpacity>
+
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -117,59 +121,90 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   content: { flexGrow: 1, padding: Spacing.md, justifyContent: 'center' },
   logoArea: { alignItems: 'center', marginBottom: Spacing.xl },
-  logoMark: {
-    width: 72, height: 72, borderRadius: Radius.lg,
-    backgroundColor: Colors.ink, alignItems: 'center', justifyContent: 'center',
+  logoImage: { width: 100, height: 125 },
+  appName: {
+    fontFamily: Font.heading,
+    fontSize: 34,
+    color: Colors.ink,
+    marginTop: 12,
+    letterSpacing: -0.5,
+  },
+  tagline: {
+    fontFamily: Font.body,
+    fontSize: 14,
+    color: Colors.inkMuted,
+    marginTop: 4,
+  },
+  card: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    borderWidth: 0.5,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  title: {
+    fontFamily: Font.headingSemi,
+    fontSize: 20,
+    color: Colors.ink,
+    marginBottom: Spacing.lg,
+  },
+  errorBox: {
+    backgroundColor: Colors.tag.alert.bg,
+    borderRadius: Radius.sm,
+    padding: Spacing.sm,
     marginBottom: Spacing.md,
   },
-  logoIcon: { fontSize: 36 },
-  appName: { ...Typography.h1, fontSize: 28, marginBottom: 4 },
-  tagline: { ...Typography.body },
-  card: {
-    backgroundColor: Colors.surface, borderRadius: Radius.lg,
-    borderWidth: 0.5, borderColor: Colors.border,
-    padding: Spacing.lg, marginBottom: Spacing.lg,
-  },
-  title: { ...Typography.h2, marginBottom: Spacing.lg },
-  errorBox: {
-    backgroundColor: Colors.tag.alert.bg, borderRadius: Radius.sm,
-    padding: Spacing.sm, marginBottom: Spacing.md,
-  },
-  errorText: { color: Colors.tag.alert.text, fontSize: 13 },
-  fieldLabel: { ...Typography.label, marginBottom: 6 },
+  errorText: { fontFamily: Font.body, color: Colors.tag.alert.text, fontSize: 13 },
+  fieldLabel: { fontFamily: Font.bodyMedium, fontSize: 13, color: Colors.ink, marginBottom: 6 },
   input: {
-    backgroundColor: Colors.background, borderRadius: Radius.md,
-    borderWidth: 0.5, borderColor: Colors.border,
-    paddingHorizontal: Spacing.md, paddingVertical: 12,
-    fontSize: 14, color: Colors.ink, marginBottom: Spacing.md,
+    backgroundColor: Colors.background,
+    borderRadius: Radius.md,
+    borderWidth: 0.5,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 12,
+    fontFamily: Font.body,
+    fontSize: 14,
+    color: Colors.ink,
+    marginBottom: Spacing.md,
   },
   hint: { marginTop: Spacing.md, alignItems: 'center' },
-  hintText: { ...Typography.caption, fontStyle: 'italic' },
+  hintText: { fontFamily: Font.body, fontSize: 12, color: Colors.inkMuted, fontStyle: 'italic' },
   switchRow: { flexDirection: 'row', justifyContent: 'center' },
-  switchText: { ...Typography.body, fontSize: 14 },
-  switchLink: { fontSize: 14, fontWeight: '600', color: Colors.ink },
+  switchText: { fontFamily: Font.body, fontSize: 14, color: Colors.inkSoft },
+  switchLink: { fontFamily: Font.bodySemi, fontSize: 14, color: Colors.ink },
   dividerRow: {
-    flexDirection: 'row', alignItems: 'center',
-    marginBottom: Spacing.md, gap: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
   },
   dividerLine: { flex: 1, height: 0.5, backgroundColor: Colors.border },
-  dividerText: { ...Typography.caption, color: Colors.inkMuted, fontSize: 12 },
+  dividerText: { fontFamily: Font.body, color: Colors.inkMuted, fontSize: 12 },
   socialRow: { gap: Spacing.sm, marginBottom: Spacing.lg },
   socialBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 10, paddingVertical: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 13,
     backgroundColor: Colors.surface,
     borderRadius: Radius.full,
-    borderWidth: 0.5, borderColor: Colors.border,
+    borderWidth: 0.5,
+    borderColor: Colors.border,
   },
   appleBtn: { backgroundColor: Colors.ink, borderColor: Colors.ink },
   socialIcon: {
     width: 20, height: 20,
-    fontSize: 14, fontWeight: '700',
-    color: '#4285F4', textAlign: 'center', lineHeight: 20,
+    fontFamily: Font.heading,
+    fontSize: 14,
+    color: '#4285F4',
+    textAlign: 'center',
+    lineHeight: 20,
     borderRadius: 10,
   },
   appleSocialIcon: { color: Colors.accentFg },
-  socialBtnText: { fontSize: 14, fontWeight: '600', color: Colors.ink },
+  socialBtnText: { fontFamily: Font.bodySemi, fontSize: 14, color: Colors.ink },
   appleBtnText: { color: Colors.accentFg },
 });

@@ -12,12 +12,12 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 type Props = { item: FeedItem };
 
 const KIND_META: Record<string, { icon: IconName; labelKey: TranslationKey; color: string }> = {
-  announcement: { icon: 'megaphone-outline',    labelKey: 'feed.newAnnouncement', color: '#1B4FBF' },
-  event:        { icon: 'calendar-outline',      labelKey: 'feed.newEvent',        color: '#2D6A4F' },
-  poll:         { icon: 'bar-chart-outline',     labelKey: 'feed.newPoll',         color: '#7C3AED' },
-  userPoll:     { icon: 'bar-chart-outline',     labelKey: 'feed.newPoll',         color: '#7C3AED' },
-  help:         { icon: 'hand-left-outline',     labelKey: 'feed.newHelp',         color: '#C05621' },
-  market:       { icon: 'pricetag-outline',      labelKey: 'feed.newMarket',       color: '#1B4FBF' },
+  announcement: { icon: 'megaphone-outline',    labelKey: 'feed.newAnnouncement', color: Colors.ink },
+  event:        { icon: 'calendar-outline',      labelKey: 'feed.newEvent',        color: Colors.tag.event.text },
+  poll:         { icon: 'bar-chart-outline',     labelKey: 'feed.newPoll',         color: Colors.ink },
+  userPoll:     { icon: 'bar-chart-outline',     labelKey: 'feed.newPoll',         color: Colors.ink },
+  help:         { icon: 'hand-left-outline',     labelKey: 'feed.newHelp',         color: Colors.tag.help.text },
+  market:       { icon: 'pricetag-outline',      labelKey: 'feed.newMarket',       color: Colors.tag.market.text },
 };
 
 export function FeedCard({ item }: Props) {

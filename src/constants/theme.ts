@@ -1,20 +1,37 @@
+// Torbu brand design tokens
 export const Colors = {
-  background: '#F5F4F0',
+  // Backgrounds
+  background: '#F2EFE6',   // Torbu cream
   surface: '#FFFFFF',
-  surfaceAlt: '#EEEDE9',
-  ink: '#1A1A1A',
-  inkSoft: '#6B6B6B',
-  inkMuted: '#A0A0A0',
-  border: '#E4E3DF',
-  accent: '#1A1A1A',
+  surfaceAlt: '#EAF2EC',   // soft sage tint
+
+  // Text
+  ink: '#1E4D3F',          // forest green (primary text + buttons)
+  inkSoft: '#3A6655',      // medium green
+  inkMuted: '#7DBEA1',     // sage green (secondary text)
+
+  // Border
+  border: '#C8DDD4',
+
+  // Button foreground
   accentFg: '#FFFFFF',
+
+  // Brand palette
+  yellow: '#F5C15D',
+  coral: '#FF7F6E',
+  sage: '#7DBEA1',
+  cream: '#F2EFE6',
+
+  // Category / tag chips
   tag: {
-    share: { bg: '#E8F4EC', text: '#2D6A4F' },
-    event: { bg: '#EAE8F8', text: '#3D35A0' },
-    help: { bg: '#FFF0E6', text: '#A0440C' },
-    alert: { bg: '#FDE8E8', text: '#991B1B' },
-    poll: { bg: '#E6F0FF', text: '#1B4FBF' },
-    market: { bg: '#F5F0E8', text: '#7A5C2E' },
+    share:  { bg: '#E4F2EB', text: '#1E4D3F' },  // green
+    event:  { bg: '#FEF4E2', text: '#9A6B15' },  // yellow
+    help:   { bg: '#FEEDE9', text: '#B3412F' },  // coral
+    alert:  { bg: '#FEEDE9', text: '#B3412F' },  // coral
+    poll:   { bg: '#E4F2EB', text: '#1E4D3F' },  // green
+    market: { bg: '#FEF4E2', text: '#9A6B15' },  // yellow/amber
+    info:   { bg: '#E4F2EB', text: '#1E4D3F' },  // green
+    noise:  { bg: '#FEF4E2', text: '#9A6B15' },  // yellow
   },
 };
 
@@ -33,11 +50,20 @@ export const Radius = {
   full: 999,
 };
 
+// Font family tokens — loaded in App.tsx via expo-font
+export const Font = {
+  heading:     'Poppins_700Bold',
+  headingSemi: 'Poppins_600SemiBold',
+  body:        'Inter_400Regular',
+  bodyMedium:  'Inter_500Medium',
+  bodySemi:    'Inter_600SemiBold',
+};
+
 export const Typography = {
-  h1: { fontSize: 26, fontWeight: '700' as const, color: Colors.ink },
-  h2: { fontSize: 20, fontWeight: '600' as const, color: Colors.ink },
-  h3: { fontSize: 16, fontWeight: '600' as const, color: Colors.ink },
-  body: { fontSize: 14, fontWeight: '400' as const, color: Colors.inkSoft },
-  caption: { fontSize: 12, fontWeight: '400' as const, color: Colors.inkMuted },
-  label: { fontSize: 13, fontWeight: '500' as const, color: Colors.ink },
+  h1:      { fontFamily: Font.heading,     fontSize: 26, color: Colors.ink },
+  h2:      { fontFamily: Font.headingSemi, fontSize: 20, color: Colors.ink },
+  h3:      { fontFamily: Font.headingSemi, fontSize: 16, color: Colors.ink },
+  body:    { fontFamily: Font.body,        fontSize: 14, color: Colors.inkSoft },
+  caption: { fontFamily: Font.body,        fontSize: 12, color: Colors.inkMuted },
+  label:   { fontFamily: Font.bodyMedium,  fontSize: 13, color: Colors.ink },
 };
