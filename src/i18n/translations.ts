@@ -74,8 +74,8 @@ export const translations = {
     'switcher.allJoined': "You've joined all available communities.",
 
     // bottom tabs
-    'tabs.home': 'Home',
-    'tabs.events': 'Events',
+    'tabs.home': 'Feed',
+    'tabs.events': 'Calendar',
     'tabs.share': 'Share',
     'tabs.community': 'Community',
 
