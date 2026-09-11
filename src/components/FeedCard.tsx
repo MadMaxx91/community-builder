@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
 import { FeedItem } from '../context/ContentContext';
@@ -9,24 +9,23 @@ import { TranslationKey } from '../i18n/translations';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
-type Props = { item: FeedItem };
-
 const KIND_META: Record<string, { icon: IconName; labelKey: TranslationKey; color: string }> = {
-  announcement: { icon: 'megaphone-outline',    labelKey: 'feed.newAnnouncement', color: Colors.ink },
-  event:        { icon: 'calendar-outline',      labelKey: 'feed.newEvent',        color: Colors.tag.event.text },
-  poll:         { icon: 'bar-chart-outline',     labelKey: 'feed.newPoll',         color: Colors.ink },
-  userPoll:     { icon: 'bar-chart-outline',     labelKey: 'feed.newPoll',         color: Colors.ink },
-  help:         { icon: 'hand-left-outline',     labelKey: 'feed.newHelp',         color: Colors.tag.help.text },
-  market:       { icon: 'pricetag-outline',      labelKey: 'feed.newMarket',       color: Colors.tag.market.text },
+  announcement: { icon: 'megaphone-outline',  labelKey: 'feed.newAnnouncement', color: '#1B4FBF' },
+  event:        { icon: 'calendar-outline',    labelKey: 'feed.newEvent',        color: '#2D6A4F' },
+  poll:         { icon: 'bar-chart-outline',   labelKey: 'feed.newPoll',         color: '#7C3AED' },
+  help:         { icon: 'hand-left-outline',   labelKey: 'feed.newHelp',         color: '#C05621' },
+  market:       { icon: 'pricetag-outline',    labelKey: 'feed.newMarket',       color: '#1B4FBF' },
 };
+
+type Props = { item: FeedItem };
 
 export function FeedCard({ item }: Props) {
   const { t } = useLanguage();
   const meta = KIND_META[item.kind];
+  if (!meta) return null;
 
   return (
     <View style={styles.card}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={[styles.iconWrap, { backgroundColor: meta.color + '18' }]}>
           <Ionicons name={meta.icon} size={14} color={meta.color} />
@@ -35,94 +34,80 @@ export function FeedCard({ item }: Props) {
         <Text style={styles.time}>{item.time}</Text>
       </View>
 
-      {/* Content */}
       <FeedItemBody item={item} />
 
-      {/* Reactions */}
       <ReactionBar itemId={item.id} />
     </View>
   );
 }
 
 function FeedItemBody({ item }: Props) {
-  const { t } = useLanguage();
-
   if (item.kind === 'announcement') {
+    const d = item.data;
     return (
       <View style={styles.body}>
-        <Text style={styles.bodyTitle}>{t(item.data.titleKey)}</Text>
-        <Text style={styles.bodyText} numberOfLines={2}>{t(item.data.bodyKey)}</Text>
-        <Text style={styles.meta}>{item.data.author} · {item.data.time}</Text>
+        <Text style={styles.bodyTitle}>{d.title}</Text>
+        <Text style={styles.bodyText} numberOfLines={2}>{d.body}</Text>
+        <Text style={styles.meta}>{d.author_name} · {item.time}</Text>
       </View>
     );
   }
 
   if (item.kind === 'event') {
+    const d = item.data;
+    const dateStr = new Date(d.starts_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const timeStr = new Date(d.starts_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
     return (
       <View style={styles.body}>
-        <Text style={styles.bodyTitle}>{t(item.data.titleKey)}</Text>
-        <Text style={styles.meta}>{t(item.data.dateKey)} · {t(item.data.timeKey)} · {t(item.data.locationKey)}</Text>
-        <Text style={styles.meta}>{item.data.attending} going · by {item.data.host}</Text>
+        <Text style={styles.bodyTitle}>{d.title}</Text>
+        <Text style={styles.meta}>{dateStr} · {timeStr}{d.location ? ` · ${d.location}` : ''}</Text>
+        <Text style={styles.meta}>{d.rsvp_count} going · by {d.author_name}</Text>
       </View>
     );
   }
 
   if (item.kind === 'poll') {
-    const top = item.data.options.reduce((a, b) => a.votes > b.votes ? a : b);
-    const pct = item.data.totalVotes > 0 ? Math.round((top.votes / item.data.totalVotes) * 100) : 0;
+    const d = item.data;
+    const top = d.options.length > 0 ? d.options.reduce((a, b) => a.votes > b.votes ? a : b) : null;
+    const pct = top && d.total_votes > 0 ? Math.round((top.votes / d.total_votes) * 100) : 0;
     return (
       <View style={styles.body}>
-        <Text style={styles.bodyTitle}>{t(item.data.questionKey)}</Text>
-        <View style={styles.pollPreview}>
-          <View style={styles.pollBarBg}>
-            <View style={[styles.pollBarFill, { width: `${pct}%` as any }]} />
+        <Text style={styles.bodyTitle}>{d.question}</Text>
+        {top && (
+          <View style={styles.pollPreview}>
+            <View style={styles.pollBarBg}>
+              <View style={[styles.pollBarFill, { width: `${pct}%` as any }]} />
+            </View>
+            <Text style={styles.meta}>{top.label} — {pct}% · {d.total_votes} votes</Text>
           </View>
-          <Text style={styles.meta}>{t(top.labelKey)} — {pct}%  ·  {item.data.totalVotes} votes</Text>
-        </View>
-      </View>
-    );
-  }
-
-  if (item.kind === 'userPoll') {
-    const top = item.data.options.length > 0
-      ? item.data.options.reduce((a, b) => a.votes > b.votes ? a : b)
-      : null;
-    return (
-      <View style={styles.body}>
-        <Text style={styles.bodyTitle}>{item.data.question}</Text>
-        <Text style={styles.meta}>
-          {item.data.totalVotes} votes · ends in {item.data.endsInLabel}
-        </Text>
-        {item.data.options.slice(0, 2).map(opt => (
-          <Text key={opt.label} style={styles.pollOption}>· {opt.label}</Text>
-        ))}
-        {item.data.options.length > 2 && (
-          <Text style={styles.meta}>+{item.data.options.length - 2} more options</Text>
         )}
+        {!top && <Text style={styles.meta}>No votes yet</Text>}
       </View>
     );
   }
 
   if (item.kind === 'help') {
+    const d = item.data;
     return (
       <View style={styles.body}>
-        <Text style={styles.bodyTitle}>{t(item.data.titleKey)}</Text>
-        <Text style={styles.bodyText} numberOfLines={2}>{t(item.data.bodyKey)}</Text>
-        <Text style={styles.meta}>{item.data.author} · {item.data.floor} · {item.data.time}</Text>
+        <Text style={styles.bodyTitle}>{d.title}</Text>
+        <Text style={styles.bodyText} numberOfLines={2}>{d.body}</Text>
+        <Text style={styles.meta}>{d.author_name}{d.floor ? ` · ${d.floor}` : ''} · {item.time}</Text>
       </View>
     );
   }
 
   if (item.kind === 'market') {
+    const d = item.data;
     return (
       <View style={styles.body}>
         <View style={styles.marketRow}>
-          <Text style={styles.marketEmoji}>{item.data.emoji}</Text>
+          <Text style={styles.marketEmoji}>{d.emoji}</Text>
           <View style={{ flex: 1 }}>
-            <Text style={styles.bodyTitle}>{t(item.data.titleKey)}</Text>
-            <Text style={styles.meta}>{item.data.seller} · {item.data.floor}</Text>
+            <Text style={styles.bodyTitle}>{d.title}</Text>
+            <Text style={styles.meta}>{d.author_name}</Text>
           </View>
-          <Text style={styles.price}>{item.data.free ? 'Free' : item.data.price}</Text>
+          <Text style={styles.price}>{d.is_free ? 'Free' : d.price != null ? `$${d.price}` : ''}</Text>
         </View>
       </View>
     );
@@ -140,19 +125,8 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: Spacing.sm,
-  },
-  iconWrap: {
-    width: 22,
-    height: 22,
-    borderRadius: Radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
+  iconWrap: { width: 22, height: 22, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
   kindLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, flex: 1 },
   time: { ...Typography.caption, fontSize: 11 },
   body: { gap: 3 },
@@ -162,7 +136,6 @@ const styles = StyleSheet.create({
   pollPreview: { marginTop: 4, gap: 4 },
   pollBarBg: { height: 4, backgroundColor: Colors.surfaceAlt, borderRadius: Radius.full, overflow: 'hidden' },
   pollBarFill: { height: 4, backgroundColor: Colors.ink, borderRadius: Radius.full },
-  pollOption: { ...Typography.caption, fontSize: 12 },
   marketRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   marketEmoji: { fontSize: 24 },
   price: { ...Typography.label, fontSize: 15 },

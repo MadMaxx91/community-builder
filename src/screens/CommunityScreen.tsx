@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, Radius } from '../constants/theme';
-import { helpRequests, polls, marketItems, HelpRequest } from '../data/mock';
-import { QuickActionCard } from '../components/QuickActionCard';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
+import type { DbHelpRequest, DbMarketItem, DbWikiEntry } from '../context/ContentContext';
 import { TranslationKey } from '../i18n/translations';
 import { CommunityAdminScreen } from './CommunityAdminScreen';
 import { CreatePollModal } from '../components/CreatePollModal';
+import { CreateHelpModal } from '../components/CreateHelpModal';
+import { CreateMarketItemModal } from '../components/CreateMarketItemModal';
+import { CreateWikiEntryModal } from '../components/CreateWikiEntryModal';
 import { ReactionBar } from '../components/ReactionBar';
+import { ItemActionMenu } from '../components/ItemActionMenu';
+import type { CommunityFeatures } from '../lib/database.types';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 type Tab = 'help' | 'polls' | 'market' | 'wiki' | 'people';
 
-type TabDef = { key: Tab; labelKey: TranslationKey; icon: IconName; featureKey?: keyof import('../data/mock').CommunityFeatures };
+type TabDef = { key: Tab; labelKey: TranslationKey; icon: IconName; featureKey?: keyof CommunityFeatures };
 
 const TAB_DEFS: TabDef[] = [
   { key: 'people', labelKey: 'community.tabPeople', icon: 'person-outline' },
@@ -28,20 +31,11 @@ const TAB_DEFS: TabDef[] = [
   { key: 'wiki',   labelKey: 'community.tabWiki',   icon: 'document-text-outline',featureKey: 'wiki' },
 ];
 
-type WikiEntry = { icon: IconName; titleKey: TranslationKey; bodyKey: TranslationKey };
 
-const WIKI_ENTRIES: WikiEntry[] = [
-  { icon: 'trash-outline',        titleKey: 'wiki.trash',     bodyKey: 'wiki.trashBody' },
-  { icon: 'construct-outline',    titleKey: 'wiki.super',     bodyKey: 'wiki.superBody' },
-  { icon: 'water-outline',        titleKey: 'wiki.pool',      bodyKey: 'wiki.poolBody' },
-  { icon: 'alert-circle-outline', titleKey: 'wiki.emergency', bodyKey: 'wiki.emergencyBody' },
-  { icon: 'cube-outline',         titleKey: 'wiki.mailroom',  bodyKey: 'wiki.mailroomBody' },
-];
-
-export function CommunityScreen({ route, navigation }: { route?: any; navigation?: any }) {
+export function CommunityScreen({ route }: { route?: any }) {
   const { t } = useLanguage();
-  const { isAdmin, setAdminVisible, activeCommunity } = useAuth();
-  const { userPolls } = useContent();
+  const { isAdmin, setAdminVisible, activeCommunity, user } = useAuth();
+  const { helpRequests, polls, marketItems, wikiEntries, toggleRsvp, deleteHelpRequest, deleteMarketItem, deleteWikiEntry, deletePoll } = useContent();
   const features = activeCommunity?.features;
 
   const visibleTabs = TAB_DEFS.filter(td => !td.featureKey || !features || features[td.featureKey]);
@@ -53,47 +47,41 @@ export function CommunityScreen({ route, navigation }: { route?: any; navigation
       setTab(requested);
     }
   }, [route?.params]);
-  const [requests] = useState<HelpRequest[]>(helpRequests);
+
   const [createPollOpen, setCreatePollOpen] = useState(false);
+  const [createHelpOpen, setCreateHelpOpen] = useState(false);
+  const [createMarketOpen, setCreateMarketOpen] = useState(false);
+  const [createWikiOpen, setCreateWikiOpen] = useState(false);
   const [memberSearch, setMemberSearch] = useState('');
+  const [editingHelp, setEditingHelp] = useState<DbHelpRequest | null>(null);
+  const [editingMarket, setEditingMarket] = useState<DbMarketItem | null>(null);
+  const [editingWiki, setEditingWiki] = useState<DbWikiEntry | null>(null);
 
   const activeTab = visibleTabs.find(td => td.key === tab) ? tab : (visibleTabs[0]?.key ?? 'people');
-  const allPolls = [...polls, ...userPolls];
   const members = activeCommunity?.members ?? [];
   const filteredMembers = memberSearch.trim()
     ? members.filter(m => m.name.toLowerCase().includes(memberSearch.toLowerCase()))
     : members;
 
   return (
-    <View style={styles.screenBg}>
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Text style={styles.title}>{activeCommunity?.name ?? t('community.title')}</Text>
-        <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => navigation?.navigate('ShareModal')} style={styles.iconBtn} activeOpacity={0.7}>
-            <Ionicons name="add-circle-outline" size={24} color={Colors.ink} />
+        {isAdmin && (
+          <TouchableOpacity onPress={() => setAdminVisible(true)} style={styles.adminBtn} activeOpacity={0.7}>
+            <Ionicons name="settings-outline" size={20} color={Colors.inkSoft} />
           </TouchableOpacity>
-          {isAdmin && (
-            <TouchableOpacity onPress={() => setAdminVisible(true)} style={styles.iconBtn} activeOpacity={0.7}>
-              <Ionicons name="settings-outline" size={20} color={Colors.inkSoft} />
-            </TouchableOpacity>
-          )}
-        </View>
+        )}
       </View>
 
       <CommunityAdminScreen />
       <CreatePollModal visible={createPollOpen} onClose={() => setCreatePollOpen(false)} />
-
-      {/* Shortcuts row */}
-      <View style={styles.shortcutsSection}>
-        <Text style={styles.shortcutsTitle}>{t('home.shortcuts')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
-          <QuickActionCard icon="hand-left-outline" label={t('home.helpRequests')} count={helpRequests.filter(r => !r.resolved).length} bg={Colors.tag.help.bg} onPress={() => setTab('help')} />
-          <QuickActionCard icon="bar-chart-outline" label={t('home.activePolls')} count={allPolls.length} bg={Colors.tag.poll.bg} onPress={() => setTab('polls')} />
-          <QuickActionCard icon="storefront-outline" label={t('home.marketplace')} count={marketItems.length} bg={Colors.tag.market.bg} onPress={() => setTab('market')} />
-          <QuickActionCard icon="document-text-outline" label={t('home.buildingWiki')} bg={Colors.surfaceAlt} onPress={() => setTab('wiki')} />
-        </ScrollView>
-      </View>
+      <CreateHelpModal visible={createHelpOpen} onClose={() => setCreateHelpOpen(false)} />
+      <CreateHelpModal item={editingHelp ?? undefined} visible={!!editingHelp} onClose={() => setEditingHelp(null)} />
+      <CreateMarketItemModal visible={createMarketOpen} onClose={() => setCreateMarketOpen(false)} />
+      <CreateMarketItemModal item={editingMarket ?? undefined} visible={!!editingMarket} onClose={() => setEditingMarket(null)} />
+      <CreateWikiEntryModal visible={createWikiOpen} onClose={() => setCreateWikiOpen(false)} />
+      <CreateWikiEntryModal item={editingWiki ?? undefined} visible={!!editingWiki} onClose={() => setEditingWiki(null)} />
 
       {visibleTabs.length > 0 ? (
         <>
@@ -164,18 +152,31 @@ export function CommunityScreen({ route, navigation }: { route?: any; navigation
             )}
 
             {/* ─── Help ─── */}
-            {activeTab === 'help' && requests.map(r => (
+            {activeTab === 'help' && (
+              <>
+                <TouchableOpacity style={styles.createPollBtn} onPress={() => setCreateHelpOpen(true)} activeOpacity={0.75}>
+                  <Ionicons name="add-circle-outline" size={18} color={Colors.ink} />
+                  <Text style={styles.createPollBtnText}>New Help Request</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            {activeTab === 'help' && helpRequests.map(r => (
               <View key={r.id} style={styles.card}>
                 <View style={styles.helpTop}>
-                  <Text style={styles.helpTitle}>{t(r.titleKey)}</Text>
+                  <Text style={styles.helpTitle}>{r.title}</Text>
                   <Badge
                     label={r.resolved ? t('community.resolved') : t('community.open')}
                     bg={r.resolved ? Colors.tag.share.bg : Colors.tag.event.bg}
                     color={r.resolved ? Colors.tag.share.text : Colors.tag.event.text}
                   />
+                  <ItemActionMenu
+                    canEdit={r.author_id === user?.id || isAdmin}
+                    onEdit={() => setEditingHelp(r)}
+                    onDelete={() => deleteHelpRequest(r.id)}
+                  />
                 </View>
-                <Text style={styles.body}>{t(r.bodyKey)}</Text>
-                <Text style={styles.meta}>{r.author} · {r.floor} · {r.time}</Text>
+                <Text style={styles.body}>{r.body}</Text>
+                <Text style={styles.meta}>{r.author_name}{r.floor ? ` · ${r.floor}` : ''}</Text>
                 {!r.resolved && (
                   <TouchableOpacity style={styles.darkBtn} activeOpacity={0.75}>
                     <Text style={styles.darkBtnText}>{t('community.iCanHelp')}</Text>
@@ -192,52 +193,34 @@ export function CommunityScreen({ route, navigation }: { route?: any; navigation
                   <Ionicons name="add-circle-outline" size={18} color={Colors.ink} />
                   <Text style={styles.createPollBtnText}>{t('poll.createTitle')}</Text>
                 </TouchableOpacity>
-                {allPolls.map(p => {
-                  const isUser = 'question' in p;
-                  if (isUser) {
-                    return (
-                      <View key={p.id} style={styles.card}>
-                        <Text style={styles.pollQ}>{p.question}</Text>
-                        {p.options.map((opt) => {
-                          const pct = p.totalVotes > 0 ? Math.round((opt.votes / p.totalVotes) * 100) : 0;
-                          return (
-                            <TouchableOpacity key={opt.label} style={styles.pollOption} activeOpacity={0.7}>
-                              <View style={styles.pollBarBg}>
-                                <View style={[styles.pollBarFill, { width: `${pct}%` as any }]} />
-                              </View>
-                              <View style={styles.pollRow}>
-                                <Text style={styles.pollLabel}>{opt.label}</Text>
-                                <Text style={styles.pollPct}>{pct}%</Text>
-                              </View>
-                            </TouchableOpacity>
-                          );
-                        })}
-                        <Text style={styles.meta}>{p.totalVotes} votes · ends in {p.endsInLabel}</Text>
-                        <ReactionBar itemId={p.id} />
-                      </View>
-                    );
-                  }
+                {polls.map(p => {
+                  const maxVotes = p.options.length > 0 ? Math.max(...p.options.map(o => o.votes)) : 0;
                   return (
                     <View key={p.id} style={styles.card}>
-                      <Text style={styles.pollQ}>{t(p.questionKey)}</Text>
-                      {p.options.map((opt) => {
-                        const pct = Math.round((opt.votes / p.totalVotes) * 100);
-                        const isWinner = opt.votes === Math.max(...p.options.map(o => o.votes));
+                      <View style={styles.pollHeader}>
+                        <Text style={[styles.pollQ, { flex: 1 }]}>{p.question}</Text>
+                        <ItemActionMenu
+                          canEdit={p.author_id === user?.id || isAdmin}
+                          onDelete={() => deletePoll(p.id)}
+                        />
+                      </View>
+                      {p.options.map(opt => {
+                        const pct = p.total_votes > 0 ? Math.round((opt.votes / p.total_votes) * 100) : 0;
+                        const isWinner = opt.votes === maxVotes && maxVotes > 0;
+                        const isUserVote = p.user_vote_option_id === opt.id;
                         return (
-                          <TouchableOpacity key={opt.labelKey} style={styles.pollOption} activeOpacity={0.7}>
+                          <TouchableOpacity key={opt.id} style={styles.pollOption} activeOpacity={0.7}>
                             <View style={styles.pollBarBg}>
                               <View style={[styles.pollBarFill, { width: `${pct}%` as any }, isWinner && styles.pollBarWinner]} />
                             </View>
                             <View style={styles.pollRow}>
-                              <Text style={styles.pollLabel}>{t(opt.labelKey)}</Text>
+                              <Text style={[styles.pollLabel, isUserVote && styles.pollLabelVoted]}>{opt.label}</Text>
                               <Text style={styles.pollPct}>{pct}%</Text>
                             </View>
                           </TouchableOpacity>
                         );
                       })}
-                      <Text style={styles.meta}>
-                        {t('community.pollMeta', { votes: p.totalVotes, endsIn: t(p.endsInKey) })}
-                      </Text>
+                      <Text style={styles.meta}>{p.total_votes} votes · by {p.author_name}</Text>
                       <ReactionBar itemId={p.id} />
                     </View>
                   );
@@ -246,33 +229,63 @@ export function CommunityScreen({ route, navigation }: { route?: any; navigation
             )}
 
             {/* ─── Market ─── */}
+            {activeTab === 'market' && (
+              <TouchableOpacity style={styles.createPollBtn} onPress={() => setCreateMarketOpen(true)} activeOpacity={0.75}>
+                <Ionicons name="add-circle-outline" size={18} color={Colors.ink} />
+                <Text style={styles.createPollBtnText}>New Listing</Text>
+              </TouchableOpacity>
+            )}
             {activeTab === 'market' && marketItems.map(m => (
               <View key={m.id} style={[styles.card, styles.row]}>
                 <View style={styles.marketIconWrap}>
-                  <Ionicons name="pricetag-outline" size={18} color={Colors.inkSoft} />
+                  <Text style={styles.marketEmoji}>{m.emoji || '🏷️'}</Text>
                 </View>
                 <View style={styles.marketInfo}>
-                  <Text style={styles.helpTitle}>{t(m.titleKey)}</Text>
-                  <Text style={styles.meta}>{m.seller} · {m.floor}</Text>
+                  <Text style={styles.helpTitle}>{m.title}</Text>
+                  <Text style={styles.meta}>{m.author_name}</Text>
                 </View>
                 <View style={styles.marketRight}>
-                  <Text style={[styles.price, m.free && styles.priceFree]}>{m.free ? t('community.marketFree') : m.price}</Text>
+                  <Text style={[styles.price, m.is_free && styles.priceFree]}>
+                    {m.is_free ? t('community.marketFree') : m.price != null ? `$${m.price}` : ''}
+                  </Text>
                   <TouchableOpacity style={styles.outlineBtn} activeOpacity={0.75}>
                     <Text style={styles.outlineBtnText}>{t('community.contact')}</Text>
                   </TouchableOpacity>
+                  <ItemActionMenu
+                    canEdit={m.author_id === user?.id || isAdmin}
+                    onEdit={() => setEditingMarket(m)}
+                    onDelete={() => deleteMarketItem(m.id)}
+                  />
                 </View>
               </View>
             ))}
 
             {/* ─── Wiki ─── */}
-            {activeTab === 'wiki' && WIKI_ENTRIES.map(w => (
-              <View key={w.titleKey} style={[styles.card, styles.row]}>
+            {activeTab === 'wiki' && (
+              <TouchableOpacity style={styles.createPollBtn} onPress={() => setCreateWikiOpen(true)} activeOpacity={0.75}>
+                <Ionicons name="add-circle-outline" size={18} color={Colors.ink} />
+                <Text style={styles.createPollBtnText}>New Wiki Entry</Text>
+              </TouchableOpacity>
+            )}
+            {activeTab === 'wiki' && wikiEntries.length === 0 && (
+              <Text style={styles.empty}>No wiki entries yet. Add building info, schedules, contacts…</Text>
+            )}
+            {activeTab === 'wiki' && wikiEntries.map(w => (
+              <View key={w.id} style={[styles.card, styles.row]}>
                 <View style={styles.wikiIconWrap}>
-                  <Ionicons name={w.icon} size={18} color={Colors.inkSoft} />
+                  <Text style={{ fontSize: 18 }}>{w.emoji}</Text>
                 </View>
                 <View style={styles.wikiContent}>
-                  <Text style={styles.helpTitle}>{t(w.titleKey)}</Text>
-                  <Text style={styles.body}>{t(w.bodyKey)}</Text>
+                  <View style={styles.wikiHeader}>
+                    <Text style={[styles.helpTitle, { flex: 1 }]}>{w.title}</Text>
+                    <ItemActionMenu
+                      canEdit={isAdmin || features?.wiki_edit_policy !== 'admin_only'}
+                      onEdit={() => setEditingWiki(w)}
+                      onDelete={() => deleteWikiEntry(w.id)}
+                    />
+                  </View>
+                  <Text style={styles.body}>{w.body}</Text>
+                  <Text style={styles.meta}>{w.author_name}</Text>
                 </View>
               </View>
             ))}
@@ -286,13 +299,11 @@ export function CommunityScreen({ route, navigation }: { route?: any; navigation
         </View>
       )}
     </SafeAreaView>
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screenBg: { flex: 1, backgroundColor: Colors.background },
-  safe: { flex: 1 },
+  safe: { flex: 1, backgroundColor: Colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -302,12 +313,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
   },
   title: { ...Typography.h1, flex: 1 },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   adminBtn: { padding: 4 },
-  shortcutsSection: { paddingHorizontal: Spacing.md, marginBottom: Spacing.sm },
-  shortcutsTitle: { ...Typography.h3, marginBottom: Spacing.sm },
-  catRow: { flexDirection: 'row', gap: Spacing.lg, paddingBottom: Spacing.sm },
   tabRowWrapper: { flexShrink: 0 },
   tabRow: { flexDirection: 'row', paddingHorizontal: Spacing.md, gap: Spacing.sm, marginBottom: Spacing.sm, paddingRight: Spacing.md, alignItems: 'center' },
   tab: {
@@ -325,7 +331,7 @@ const styles = StyleSheet.create({
   tabLabel: { fontSize: 12, fontWeight: '500', color: Colors.inkSoft },
   tabLabelActive: { color: Colors.accentFg },
   scroll: { flex: 1 },
-  content: { padding: Spacing.md, paddingBottom: 120 },
+  content: { padding: Spacing.md, paddingBottom: 40 },
   // Directory
   directoryHeader: { marginBottom: Spacing.sm },
   directoryCount: { ...Typography.label, color: Colors.inkSoft },
@@ -400,15 +406,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   darkBtnText: { color: Colors.accentFg, fontSize: 13, fontWeight: '600' },
-  pollQ: { ...Typography.label, marginBottom: Spacing.sm, lineHeight: 20 },
+  pollHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: Spacing.sm },
+  pollQ: { ...Typography.label, lineHeight: 20 },
   pollOption: { marginBottom: 8 },
   pollBarBg: { height: 5, backgroundColor: Colors.surfaceAlt, borderRadius: Radius.full, overflow: 'hidden', marginBottom: 4 },
   pollBarFill: { height: 5, backgroundColor: Colors.inkMuted, borderRadius: Radius.full },
   pollBarWinner: { backgroundColor: Colors.ink },
   pollRow: { flexDirection: 'row', justifyContent: 'space-between' },
   pollLabel: { ...Typography.caption, flex: 1 },
+  pollLabelVoted: { fontWeight: '700' },
   pollPct: { ...Typography.caption, fontWeight: '600' },
   marketIconWrap: { width: 42, height: 42, backgroundColor: Colors.surfaceAlt, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  marketEmoji: { fontSize: 22 },
   marketInfo: { flex: 1 },
   marketRight: { alignItems: 'flex-end', gap: 6 },
   price: { ...Typography.label, fontSize: 15 },
@@ -423,6 +432,7 @@ const styles = StyleSheet.create({
   outlineBtnText: { fontSize: 12, fontWeight: '600', color: Colors.ink },
   wikiIconWrap: { width: 36, height: 36, backgroundColor: Colors.surfaceAlt, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   wikiContent: { flex: 1 },
+  wikiHeader: { flexDirection: 'row', alignItems: 'center' },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.md, paddingHorizontal: Spacing.xl },
   emptyText: { ...Typography.body, textAlign: 'center', color: Colors.inkSoft },
 });

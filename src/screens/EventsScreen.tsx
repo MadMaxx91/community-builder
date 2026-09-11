@@ -1,27 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, Typography, Radius } from '../constants/theme';
-import { events, EventItem } from '../data/mock';
 import { EventCard } from '../components/EventCard';
 import { Button } from '../components/ui/Button';
 import { useLanguage } from '../context/LanguageContext';
+import { useContent } from '../context/ContentContext';
+import type { DbEvent } from '../context/ContentContext';
+import { CreateEventModal } from '../components/CreateEventModal';
+import { useAuth } from '../context/AuthContext';
 
 export function EventsScreen() {
   const { t } = useLanguage();
-  const [items, setItems] = useState<EventItem[]>(events);
+  const { events, toggleRsvp, deleteEvent } = useContent();
+  const { user, isAdmin } = useAuth();
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<DbEvent | null>(null);
 
-  const displayed = filter === 'mine' ? items.filter(e => e.rsvp) : items;
-
-  function toggleRsvp(id: string) {
-    setItems(prev => prev.map(e => e.id === id ? { ...e, rsvp: !e.rsvp, attending: e.rsvp ? e.attending - 1 : e.attending + 1 } : e));
-  }
+  const displayed = filter === 'mine' ? events.filter(e => e.user_rsvped) : events;
 
   return (
     <SafeAreaView style={styles.safe}>
+      <CreateEventModal visible={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreateEventModal item={editingEvent ?? undefined} visible={!!editingEvent} onClose={() => setEditingEvent(null)} />
       <View style={styles.topBar}>
         <Text style={styles.title}>{t('events.title')}</Text>
-        <Button label={t('events.new')} variant="primary" style={styles.newBtn} />
+        <Button label={t('events.new')} variant="primary" style={styles.newBtn} onPress={() => setCreateOpen(true)} />
       </View>
 
       <View style={styles.pills}>
@@ -46,7 +50,16 @@ export function EventsScreen() {
             <Text style={styles.emptyText}>{t('events.noRsvps')}</Text>
           </View>
         ) : (
-          displayed.map(e => <EventCard key={e.id} event={e} onRsvp={toggleRsvp} />)
+          displayed.map(e => (
+            <EventCard
+              key={e.id}
+              event={e}
+              onRsvp={toggleRsvp}
+              canEdit={user?.id === e.author_id || isAdmin}
+              onEdit={() => setEditingEvent(e)}
+              onDelete={() => deleteEvent(e.id)}
+            />
+          ))
         )}
       </ScrollView>
     </SafeAreaView>
@@ -80,6 +93,6 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: Spacing.md, paddingBottom: 40 },
   empty: { alignItems: 'center', paddingTop: 60 },
-  emptyEmoji: { fontSize: 40, marginBottom: Spacing.md },
+  emptyEmoji: { fontSize: 40, marginBottom: Spacing.sm },
   emptyText: { ...Typography.body, textAlign: 'center', maxWidth: 240 },
 });
