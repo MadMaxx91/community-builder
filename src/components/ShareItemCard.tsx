@@ -2,9 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
-import { ShareItem } from '../data/mock';
+import type { DbShareItem } from '../lib/database.types';
 import { Badge } from './ui/Badge';
 import { useLanguage } from '../context/LanguageContext';
+import { ItemActionMenu } from './ItemActionMenu';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -16,13 +17,25 @@ const CATEGORY_ICONS: Record<string, IconName> = {
 };
 
 type Props = {
-  item: ShareItem;
+  item: DbShareItem;
   onRequest?: (id: string) => void;
+  canEdit?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 };
 
-export function ShareItemCard({ item, onRequest }: Props) {
+export function ShareItemCard({ item, onRequest, canEdit, onEdit, onDelete }: Props) {
   const { t } = useLanguage();
   const icon = CATEGORY_ICONS[item.category] ?? 'cube-outline';
+
+  const expiresStr = item.expires_at
+    ? (() => {
+        const diff = new Date(item.expires_at).getTime() - Date.now();
+        const days = Math.ceil(diff / 86400000);
+        return days > 0 ? `${days}d left` : 'expired';
+      })()
+    : null;
+
   return (
     <View style={styles.card}>
       <View style={styles.iconBox}>
@@ -30,7 +43,7 @@ export function ShareItemCard({ item, onRequest }: Props) {
       </View>
       <View style={styles.content}>
         <View style={styles.row}>
-          <Text style={styles.title}>{t(item.titleKey)}</Text>
+          <Text style={styles.title}>{item.title}</Text>
           <Badge
             label={item.available ? t('share.availableBadge') : t('share.borrowedBadge')}
             bg={item.available ? Colors.tag.share.bg : Colors.tag.alert.bg}
@@ -38,13 +51,16 @@ export function ShareItemCard({ item, onRequest }: Props) {
           />
         </View>
         <Text style={styles.meta}>
-          {t('share.expires', { owner: item.owner, floor: item.floor, expiresIn: t(item.expiresInKey) })}
+          {item.owner_name}{expiresStr ? ` · ${expiresStr}` : ''}
         </Text>
       </View>
       {item.available && (
         <TouchableOpacity style={styles.btn} onPress={() => onRequest?.(item.id)} activeOpacity={0.7}>
           <Text style={styles.btnText}>{t('share.ask')}</Text>
         </TouchableOpacity>
+      )}
+      {canEdit && onDelete && (
+        <ItemActionMenu canEdit={canEdit} onEdit={onEdit} onDelete={onDelete} />
       )}
     </View>
   );

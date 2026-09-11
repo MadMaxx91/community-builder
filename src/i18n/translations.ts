@@ -53,7 +53,7 @@ export const translations = {
     'home.helpRequests': 'Help requests',
     'home.activePolls': 'Active polls',
     'home.marketplace': 'Marketplace',
-    'home.buildingWiki': 'Building wiki',
+    'home.buildingWiki': 'Wiki',
     'home.activePoll': 'Active poll',
     'home.announcements': 'Announcements',
     'home.pollMeta': '{votes} votes · ends in {endsIn}',
@@ -74,8 +74,8 @@ export const translations = {
     'switcher.allJoined': "You've joined all available communities.",
 
     // bottom tabs
-    'tabs.home': 'Feed',
-    'tabs.events': 'Calendar',
+    'tabs.home': 'Home',
+    'tabs.events': 'Events',
     'tabs.share': 'Share',
     'tabs.community': 'Community',
 
@@ -203,7 +203,7 @@ export const translations = {
     'admin.featureShare': 'Share & Borrow',
     'admin.featureMarket': 'Marketplace',
     'admin.featureHelp': 'Help requests',
-    'admin.featureWiki': 'Building wiki',
+    'admin.featureWiki': 'Wiki',
     'admin.featureAnnouncements': 'Announcements',
     'admin.members': 'Members',
     'admin.invite': 'Invite member',
@@ -514,7 +514,7 @@ export const translations = {
     'admin.featureShare': 'Megosztás és kölcsönzés',
     'admin.featureMarket': 'Piactér',
     'admin.featureHelp': 'Segítségkérések',
-    'admin.featureWiki': 'Épület wiki',
+    'admin.featureWiki': 'Wiki',
     'admin.featureAnnouncements': 'Hirdetések',
     'admin.members': 'Tagok',
     'admin.invite': 'Tag meghívása',

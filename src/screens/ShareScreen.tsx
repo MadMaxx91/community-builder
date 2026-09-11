@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, Typography, Radius } from '../constants/theme';
-import { shareItems, ShareItem } from '../data/mock';
 import { ShareItemCard } from '../components/ShareItemCard';
 import { Button } from '../components/ui/Button';
 import { useLanguage } from '../context/LanguageContext';
+import { useContent } from '../context/ContentContext';
+import type { DbShareItem } from '../context/ContentContext';
+import { CreateShareItemModal } from '../components/CreateShareItemModal';
+import { useAuth } from '../context/AuthContext';
 
 type Category = { key: string; labelKey: 'share.catAll' | 'share.catTools' | 'share.catFood' | 'share.catSports' | 'share.catKitchen' };
 
@@ -18,16 +21,21 @@ const CATEGORIES: Category[] = [
 
 export function ShareScreen() {
   const { t } = useLanguage();
-  const [items] = useState<ShareItem[]>(shareItems);
+  const { shareItems, deleteShareItem } = useContent();
+  const { user, isAdmin } = useAuth();
   const [cat, setCat] = useState('All');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<DbShareItem | null>(null);
 
-  const displayed = cat === 'All' ? items : items.filter(i => i.category === cat);
+  const displayed = cat === 'All' ? shareItems : shareItems.filter(i => i.category === cat);
 
   return (
     <SafeAreaView style={styles.safe}>
+      <CreateShareItemModal visible={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreateShareItemModal item={editingItem ?? undefined} visible={!!editingItem} onClose={() => setEditingItem(null)} />
       <View style={styles.topBar}>
         <Text style={styles.title}>{t('share.title')}</Text>
-        <Button label={t('share.new')} variant="primary" style={styles.newBtn} />
+        <Button label={t('share.new')} variant="primary" style={styles.newBtn} onPress={() => setCreateOpen(true)} />
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll} contentContainerStyle={styles.catContent}>
@@ -45,24 +53,31 @@ export function ShareScreen() {
 
       <View style={styles.statsRow}>
         <View style={styles.stat}>
-          <Text style={styles.statNum}>{items.filter(i => i.available).length}</Text>
+          <Text style={styles.statNum}>{shareItems.filter(i => i.available).length}</Text>
           <Text style={styles.statLabel}>{t('share.availableNow')}</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.stat}>
-          <Text style={styles.statNum}>{items.filter(i => !i.available).length}</Text>
+          <Text style={styles.statNum}>{shareItems.filter(i => !i.available).length}</Text>
           <Text style={styles.statLabel}>{t('share.borrowed')}</Text>
         </View>
         <View style={styles.divider} />
         <View style={styles.stat}>
-          <Text style={styles.statNum}>{items.length}</Text>
+          <Text style={styles.statNum}>{shareItems.length}</Text>
           <Text style={styles.statLabel}>{t('share.totalItems')}</Text>
         </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {displayed.map(item => (
-          <ShareItemCard key={item.id} item={item} onRequest={(id) => console.log('Requesting', id)} />
+          <ShareItemCard
+            key={item.id}
+            item={item}
+            onRequest={(id) => console.log('Requesting', id)}
+            canEdit={user?.id === item.owner_id || isAdmin}
+            onEdit={() => setEditingItem(item)}
+            onDelete={() => deleteShareItem(item.id)}
+          />
         ))}
       </ScrollView>
     </SafeAreaView>
