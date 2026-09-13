@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
-import { CommunityFeatures, CommunityMember } from '../data/mock';
+import { CommunityFeatures, CommunityMember } from '../lib/database.types';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { TranslationKey } from '../i18n/translations';
@@ -132,6 +132,32 @@ export function CommunityAdminScreen() {
               </View>
             ))}
           </View>
+
+          {/* Wiki edit policy */}
+          {features.wiki && (
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Wiki permissions</Text>
+              <Text style={styles.subtitle}>Choose who can create and edit wiki entries.</Text>
+              <View style={styles.featureRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.featureLabel}>Members can edit</Text>
+                  <Text style={[styles.subtitle, { marginTop: 2 }]}>
+                    {features.wiki_edit_policy !== 'admin_only'
+                      ? 'Any member can add and edit wiki entries'
+                      : 'Only admins can add and edit wiki entries'}
+                  </Text>
+                </View>
+                <Switch
+                  value={features.wiki_edit_policy !== 'admin_only'}
+                  onValueChange={v =>
+                    setFeatures(f => f ? { ...f, wiki_edit_policy: v ? 'members' : 'admin_only' } : f)
+                  }
+                  trackColor={{ false: Colors.surfaceAlt, true: Colors.ink }}
+                  thumbColor={Colors.accentFg}
+                />
+              </View>
+            </View>
+          )}
 
           {/* Join Code */}
           <View style={styles.card}>

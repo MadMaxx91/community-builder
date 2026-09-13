@@ -3,36 +3,37 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, Radius, Font } from '../constants/theme';
-import { events, EventItem } from '../data/mock';
+import { useContent } from '../context/ContentContext';
+import type { DbEvent } from '../context/ContentContext';
 import { EventCard } from '../components/EventCard';
-import { useLanguage } from '../context/LanguageContext';
+import { CreateEventModal } from '../components/CreateEventModal';
+import { useAuth } from '../context/AuthContext';
 
-// Day numbers for each event id (Sep 2026)
-const EVENT_DAYS: Record<string, number> = { e1: 6, e2: 12, e3: 20, e4: 21 };
 const MONTH_YEAR = 'September 2026';
 const MONTH = 8; // 0-indexed September
 const YEAR = 2026;
 // Sep 1, 2026 = Tuesday (0=Sun,1=Mon,...,2=Tue) → Monday-start offset = 1
 const FIRST_DAY_OFFSET = 1; // days before Sep 1 in Mon-start grid
 const DAYS_IN_MONTH = 30;
-const TODAY = 2;
+const TODAY = 11;
 
 const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-type Props = { navigation: any };
-
-export function CalendarScreen({ navigation }: Props) {
-  const { t } = useLanguage();
+export function CalendarScreen() {
+  const { events, toggleRsvp, deleteEvent } = useContent();
+  const { user, isAdmin } = useAuth();
   const [selectedDay, setSelectedDay] = useState<number>(TODAY);
-  const [items, setItems] = useState<EventItem[]>(events);
+  const [editingEvent, setEditingEvent] = useState<DbEvent | null>(null);
 
-  const dayEventMap: Record<number, EventItem[]> = {};
-  items.forEach(e => {
-    const d = EVENT_DAYS[e.id];
-    if (d) {
-      if (!dayEventMap[d]) dayEventMap[d] = [];
-      dayEventMap[d].push(e);
+  // Map day → events that fall on that day in Sep 2026
+  const dayEventMap: Record<number, typeof events> = {};
+  events.forEach(e => {
+    const d = new Date(e.starts_at);
+    if (d.getFullYear() === YEAR && d.getMonth() === MONTH) {
+      const day = d.getDate();
+      if (!dayEventMap[day]) dayEventMap[day] = [];
+      dayEventMap[day].push(e);
     }
   });
 
@@ -46,19 +47,14 @@ export function CalendarScreen({ navigation }: Props) {
   // pad to full weeks
   while (cells.length % 7 !== 0) cells.push(null);
 
-  function toggleRsvp(id: string) {
-    setItems(prev => prev.map(e => e.id === id ? { ...e, rsvp: !e.rsvp, attending: e.rsvp ? e.attending - 1 : e.attending + 1 } : e));
-  }
-
   return (
     <View style={styles.screenBg}>
+    <CreateEventModal item={editingEvent ?? undefined} visible={!!editingEvent} onClose={() => setEditingEvent(null)} />
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Calendar</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('ShareModal')} style={styles.iconBtn} activeOpacity={0.7}>
-          <Ionicons name="add-circle-outline" size={24} color={Colors.ink} />
-        </TouchableOpacity>
+        <Ionicons name="calendar-outline" size={22} color={Colors.ink} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -106,9 +102,27 @@ export function CalendarScreen({ navigation }: Props) {
               : 'Upcoming events'}
           </Text>
           {selectedEvents.length > 0 ? (
-            selectedEvents.map(e => <EventCard key={e.id} event={e} onRsvp={toggleRsvp} />)
+            selectedEvents.map(e => (
+              <EventCard
+                key={e.id}
+                event={e}
+                onRsvp={toggleRsvp}
+                canEdit={user?.id === e.author_id || isAdmin}
+                onEdit={() => setEditingEvent(e)}
+                onDelete={() => deleteEvent(e.id)}
+              />
+            ))
           ) : (
-            items.map(e => <EventCard key={e.id} event={e} onRsvp={toggleRsvp} />)
+            events.map(e => (
+              <EventCard
+                key={e.id}
+                event={e}
+                onRsvp={toggleRsvp}
+                canEdit={user?.id === e.author_id || isAdmin}
+                onEdit={() => setEditingEvent(e)}
+                onDelete={() => deleteEvent(e.id)}
+              />
+            ))
           )}
         </View>
 
@@ -130,7 +144,6 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
   },
   title: { ...Typography.h1 },
-  iconBtn: { padding: 4 },
   scroll: { flex: 1 },
   content: { padding: Spacing.md, paddingBottom: 120 },
   monthRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: Spacing.sm },
@@ -162,6 +175,5 @@ const styles = StyleSheet.create({
   dotSelected: { backgroundColor: Colors.accentFg },
   eventsSection: { marginBottom: Spacing.lg },
   sectionTitle: { ...Typography.h3, marginBottom: Spacing.sm },
-  empty: { alignItems: 'center', paddingVertical: Spacing.xl, gap: Spacing.sm },
   emptyText: { ...Typography.body, color: Colors.inkMuted },
 });

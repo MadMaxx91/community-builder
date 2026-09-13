@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { CommunityType } from '../data/mock';
+import { CommunityType } from '../lib/database.types';
 import { CreateCommunityModal } from './CreateCommunityModal';
 
 type FilterValue = CommunityType | 'all';

@@ -2,49 +2,62 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
-import { EventItem } from '../data/mock';
+import type { DbEvent } from '../lib/database.types';
 import { Button } from './ui/Button';
 import { useLanguage } from '../context/LanguageContext';
+import { ItemActionMenu } from './ItemActionMenu';
 
 type Props = {
-  event: EventItem;
+  event: DbEvent;
   onRsvp?: (id: string) => void;
+  canEdit?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 };
 
-export function EventCard({ event, onRsvp }: Props) {
+export function EventCard({ event, onRsvp, canEdit, onEdit, onDelete }: Props) {
   const { t } = useLanguage();
+  const date = new Date(event.starts_at);
+  const dateStr = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeStr = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.datePill}>
-          <Text style={styles.dateText}>{t(event.dateKey)}</Text>
+          <Text style={styles.dateText}>{dateStr}</Text>
         </View>
-        {event.rsvp && (
+        {event.user_rsvped && (
           <View style={styles.goingPill}>
             <Ionicons name="checkmark" size={12} color={Colors.tag.share.text} />
             <Text style={styles.goingText}>{t('events.going')}</Text>
           </View>
         )}
+        {canEdit && onDelete && (
+          <ItemActionMenu canEdit={canEdit} onEdit={onEdit} onDelete={onDelete} />
+        )}
       </View>
       <View style={styles.body}>
-        <Text style={styles.title}>{t(event.titleKey)}</Text>
+        <Text style={styles.title}>{event.title}</Text>
         <View style={styles.metaRow}>
           <Ionicons name="person-outline" size={12} color={Colors.inkMuted} />
-          <Text style={styles.meta}>{t('events.by', { host: event.host })}</Text>
+          <Text style={styles.meta}>{t('events.by', { host: event.author_name })}</Text>
         </View>
         <View style={styles.metaRow}>
           <Ionicons name="time-outline" size={12} color={Colors.inkMuted} />
-          <Text style={styles.meta}>{t(event.timeKey)}</Text>
+          <Text style={styles.meta}>{timeStr}</Text>
         </View>
-        <View style={styles.metaRow}>
-          <Ionicons name="location-outline" size={12} color={Colors.inkMuted} />
-          <Text style={styles.meta}>{t(event.locationKey)}</Text>
-        </View>
+        {event.location ? (
+          <View style={styles.metaRow}>
+            <Ionicons name="location-outline" size={12} color={Colors.inkMuted} />
+            <Text style={styles.meta}>{event.location}</Text>
+          </View>
+        ) : null}
         <View style={styles.footer}>
-          <Text style={styles.attending}>{t('events.attendingCount', { count: event.attending })}</Text>
+          <Text style={styles.attending}>{t('events.attendingCount', { count: event.rsvp_count })}</Text>
           <Button
-            label={event.rsvp ? t('events.cancelRsvp') : t('events.rsvp')}
-            variant={event.rsvp ? 'ghost' : 'primary'}
+            label={event.user_rsvped ? t('events.cancelRsvp') : t('events.rsvp')}
+            variant={event.user_rsvped ? 'ghost' : 'primary'}
             onPress={() => onRsvp?.(event.id)}
             style={styles.rsvpBtn}
           />

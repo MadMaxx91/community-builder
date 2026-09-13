@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
-import { Announcement } from '../data/mock';
-import { useLanguage } from '../context/LanguageContext';
+import type { DbAnnouncement } from '../lib/database.types';
 import { ReactionBar } from './ReactionBar';
+import { ItemActionMenu } from './ItemActionMenu';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -14,20 +14,29 @@ const TYPE_CONFIG: Record<string, { icon: IconName; color: string; bg: string }>
   noise: { icon: 'musical-notes-outline',   color: '#2D6A4F', bg: '#E8F4EC' },
 };
 
-type Props = { item: Announcement };
+type Props = {
+  item: DbAnnouncement;
+  canEdit?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+};
 
-export function AnnouncementCard({ item }: Props) {
-  const { t } = useLanguage();
-  const cfg = TYPE_CONFIG[item.type];
+export function AnnouncementCard({ item, canEdit, onEdit, onDelete }: Props) {
+  const cfg = TYPE_CONFIG[item.type] ?? TYPE_CONFIG.info;
   return (
     <View style={[styles.card, { backgroundColor: cfg.bg }]}>
       <View style={[styles.iconWrap, { backgroundColor: cfg.color + '18' }]}>
         <Ionicons name={cfg.icon} size={16} color={cfg.color} />
       </View>
       <View style={styles.content}>
-        <Text style={styles.title}>{t(item.titleKey)}</Text>
-        <Text style={styles.body}>{t(item.bodyKey)}</Text>
-        <Text style={styles.meta}>{item.author} · {item.time}</Text>
+        <View style={styles.headerRow}>
+          <Text style={[styles.title, { flex: 1 }]}>{item.title}</Text>
+          {canEdit && onDelete && (
+            <ItemActionMenu canEdit={canEdit} onEdit={onEdit} onDelete={onDelete} />
+          )}
+        </View>
+        <Text style={styles.body}>{item.body}</Text>
+        <Text style={styles.meta}>{item.author_name}</Text>
         <ReactionBar itemId={item.id} />
       </View>
     </View>
@@ -53,6 +62,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   content: { flex: 1, gap: 3 },
+  headerRow: { flexDirection: 'row', alignItems: 'center' },
   title: { ...Typography.label },
   body: { ...Typography.body, lineHeight: 18 },
   meta: { ...Typography.caption, marginTop: 2 },

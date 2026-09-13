@@ -4,6 +4,7 @@ import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/b
 import { Ionicons } from '@expo/vector-icons';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
+import { ShareScreen } from '../screens/ShareScreen';
 import { CommunityScreen } from '../screens/CommunityScreen';
 import { Colors } from '../constants/theme';
 
@@ -16,7 +17,7 @@ const TAB_BAR_H = 72;
 const BOTTOM = 24;
 const R = TAB_BAR_H / 2;
 const INDICATOR = 52;
-const TAB_W = PILL_W / 3;
+const TAB_W = PILL_W / 4;
 
 function indicatorTarget(index: number) {
   return TAB_W * index + (TAB_W - INDICATOR) / 2;
@@ -31,15 +32,18 @@ type TabDef = {
 };
 
 const TABS: TabDef[] = [
-  { name: 'Home',      component: HomeScreen,     icon: 'home-outline',     iconActive: 'home',     size: 22 },
-  { name: 'Community', component: CommunityScreen, icon: 'people-outline',   iconActive: 'people',   size: 26 },
-  { name: 'Calendar',  component: CalendarScreen,  icon: 'calendar-outline', iconActive: 'calendar', size: 22 },
+  { name: 'Home',      component: HomeScreen,      icon: 'home-outline',           iconActive: 'home',           size: 22 },
+  { name: 'Calendar',  component: CalendarScreen,  icon: 'calendar-outline',       iconActive: 'calendar',       size: 22 },
+  { name: 'Share',     component: ShareScreen,     icon: 'swap-horizontal-outline', iconActive: 'swap-horizontal', size: 22 },
+  { name: 'Community', component: CommunityScreen, icon: 'people-outline',         iconActive: 'people',         size: 26 },
 ];
 
+const INITIAL_INDEX = 1;
+
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
-  const [activeIndex, setActiveIndex] = useState(1);
-  const activeRef = useRef(1);
-  const slideAnim = useRef(new Animated.Value(indicatorTarget(1))).current;
+  const [activeIndex, setActiveIndex] = useState(INITIAL_INDEX);
+  const activeRef = useRef(INITIAL_INDEX);
+  const slideAnim = useRef(new Animated.Value(indicatorTarget(INITIAL_INDEX))).current;
 
   function handlePress(index: number) {
     const route = state.routes[index];
@@ -61,14 +65,11 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 
   return (
     <>
-      {/* Shadow pill — no overflow:hidden so iOS shadow renders */}
       <View style={styles.pillShadow} />
-      {/* Clip pill — clips the sliding indicator */}
       <View style={styles.pillClip}>
         <Animated.View
           style={[styles.indicator, { transform: [{ translateX: slideAnim }] }]}
         />
-        {/* Icon row */}
         <View style={styles.row}>
           {TABS.map(({ icon, iconActive, size }, index) => (
             <TouchableOpacity
@@ -93,7 +94,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 export function TabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Community"
+      initialRouteName="Calendar"
       screenOptions={{ headerShown: false }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
